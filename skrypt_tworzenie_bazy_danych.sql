@@ -53,7 +53,7 @@ create table t_uczniowe_w_grupie(
     date_do			date default null,
     primary key (id_ucznia,id_grupy),
     foreign key (id_ucznia) references t_uczniowie(id_ucznia),
-    foreign key (id_ucznia) references t_uczniowie(id_ucznia),
+	foreign key (id_grupy) references t_grupy(id_grupy),	
     check (data_do > data_od or data_do is null)
 );
 
