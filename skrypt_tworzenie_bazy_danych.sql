@@ -50,7 +50,7 @@ create table t_uczniowe_w_grupie(
 	id_ucznia		int,
     id_grupy		int,
     data_od			date not null,
-    date_do			date default null,
+    data_do			date default null,
     primary key (id_ucznia,id_grupy),
     foreign key (id_ucznia) references t_uczniowie(id_ucznia),
 	foreign key (id_grupy) references t_grupy(id_grupy),	
@@ -68,8 +68,9 @@ create table t_dni_robocze(
 -- tabela pomocnicza (słownikowa) z długośiami lekcji
 drop table if exists t_dlugosci;
 create table t_dlugosci(
-	id_dlugosci 	int primary key,
-    dlugosc			varchar(50)
+	id_dlugosci 	int primary key auto_increment,
+    dlugosc			varchar(50),
+    dlg				int
 );
 
 -- tabela z definicjami planów zajęć
@@ -103,6 +104,8 @@ create table t_stawki_uczniow(
     cena_std		float,
     cena_nieob		float default null,
     stawka_podatku	float not null,
+    liczebnosc_grupy_od	int not null,
+    liczebnosc_grupy_do	int not null,
     foreign key (id_dlugosci) references t_dlugosci(id_dlugosci),
     check (data_do > data_od or data_do is null)
 );
@@ -118,6 +121,8 @@ create table t_stawki_nauczycieli(
     cena_nieob		float default 0,
     cena_zast		float,
     stawka_podatku	float,
+    liczebnosc_grupy_od	int not null,
+    liczebnosc_grupy_do	int not null,
     foreign key (id_dlugosci) references t_dlugosci(id_dlugosci),
     check (data_do > data_od or data_do is null)
 );
