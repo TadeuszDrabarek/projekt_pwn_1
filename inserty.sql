@@ -337,3 +337,85 @@ insert into t_uczniowe_w_grupie(id_ucznia,id_grupy,data_od,data_do) values(97,8,
 insert into t_uczniowe_w_grupie(id_ucznia,id_grupy,data_od,data_do) values(98,8,'2017-09-01','2018-01-31');
 insert into t_uczniowe_w_grupie(id_ucznia,id_grupy,data_od,data_do) values(99,8,'2017-09-01','2018-01-31');
 
+# dni      : 1-6 (pn-sob)
+# dlugosci : 1(45), 2(60), 3(90)
+# semestr  = 1
+# nauczciele  <1,2,3,4>
+# grupy       <3,...,14> 
+
+-- ** Ramowy plan zajęć na semestr ZIMOWY 2017/2018 ** --
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(3,1,1,'16:00','16:45','2017-09-01','2018-01-31',1,1);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(4,1,1,'17:00','17:45','2017-09-01','2018-01-31',1,1);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(5,1,1,'18:00','18:45','2017-09-01','2018-01-31',1,1);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(6,1,3,'19:00','21:30','2017-09-01','2018-01-31',1,1);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(7,1,2,'16:30','17:30','2017-09-01','2018-01-31',1,2);    
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(8,1,3,'18:00','19:30','2017-09-01','2018-01-31',1,2);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(9,1,1,'19:45','20:30','2017-09-01','2018-01-31',1,2);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(10,2,2,'16:00','17:00','2017-09-01','2018-01-31',1,3);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(11,2,2,'17:15','18:15','2017-09-01','2018-01-31',1,3);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(12,2,3,'18:30','20:00','2017-09-01','2018-01-31',1,3);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(13,2,3,'17:00','18:30','2017-09-01','2018-01-31',1,4);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(14,2,3,'19:00','20:30','2017-09-01','2018-01-31',1,4);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(3,4,2,'16:00','17:00','2017-09-01','2018-01-31',1,1);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(4,4,2,'17:15','18:15','2017-09-01','2018-01-31',1,1);    
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(5,4,2,'18:30','19:30','2017-09-01','2018-01-31',1,1);    
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(6,4,1,'19:45','20:30','2017-09-01','2018-01-31',1,1);    
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(7,4,1,'16:00','16:45','2017-09-01','2018-01-31',1,2);    
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(8,4,1,'17:00','17:45','2017-09-01','2018-01-31',1,2);    
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(9,4,3,'18:00','19:30','2017-09-01','2018-01-31',1,2);    
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(10,4,3,'16:00','17:30','2017-09-01','2018-01-31',1,3);    
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(11,4,3,'17:45','19:15','2017-09-01','2018-01-31',1,3);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(12,4,3,'19:30','21:00','2017-09-01','2018-01-31',1,3);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(13,5,2,'18:00','19:00','2017-09-01','2018-01-31',1,4);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(14,5,2,'19:30','20:30','2017-09-01','2018-01-31',1,4);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(3,6,1,'11:00','11:45','2017-09-01','2018-01-31',1,1);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(4,6,1,'12:00','12:45','2017-09-01','2018-01-31',1,1);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(5,6,1,'13:00','13:45','2017-09-01','2018-01-31',1,1);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(6,6,1,'14:00','14:45','2017-09-01','2018-01-31',1,1);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(7,6,1,'11:30','12:15','2017-09-01','2018-01-31',1,2);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(8,6,1,'12:30','13:15','2017-09-01','2018-01-31',1,2);
+insert into t_plany(id_grupy,id_dnia,id_dlugosci,godzina_rozp, godzina_konc,data_od,data_do,id_semestru,id_nauczyciela) 
+	values(9,6,1,'13:30','14:15','2017-09-01','2018-01-31',1,2);
+    
+-- poprawka na datach    
+insert into  t_dni_robocze(id_dnia,nazwa_dnia) values(7,'Niedziela');
+update t_plany set id_dnia=id_dnia+1;
+update t_dni_robocze set nazwa_dnia='Niedziela' where id_dnia=1;
+update t_dni_robocze set nazwa_dnia='Poniedziałek' where id_dnia=2;
+update t_dni_robocze set nazwa_dnia='Wtorek' where id_dnia=3;
+update t_dni_robocze set nazwa_dnia='Środa' where id_dnia=4;
+update t_dni_robocze set nazwa_dnia='Czwartek' where id_dnia=5;
+update t_dni_robocze set nazwa_dnia='Piątek' where id_dnia=6;
+update t_dni_robocze set nazwa_dnia='Sobota' where id_dnia=7;
+
+commit;

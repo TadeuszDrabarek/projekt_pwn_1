@@ -133,9 +133,11 @@ create table t_zajecia(
 	id_zajecia		int primary key auto_increment,
     id_planu		int,
     data_zajec		date not null,
+    godzina_zajec	time,
     czy_odbyte		int,
     czy_odrabiane	int,
     data_odrabiania	date,
+    godzina_odrabiania	time,
     id_nauczyciela	int,
     foreign key (id_planu) references t_plany(id_planu),
     foreign key (id_nauczyciela) references t_nauczyciele(id_nauczyciela),
@@ -144,16 +146,20 @@ create table t_zajecia(
     check (   data_odrabiania is null and czy_odrabiane=0 
            or data_odrabiania is not null and czy_odrabiane=1)    
 );
+alter table t_zajecia add constraint unique(id_planu,data_zajec);
 
 -- Tabela z obecnościami uczniów
 drop table if exists t_obecnosci;
 create table t_obecnosci(
 	id_obecnosci	int primary key auto_increment,
     id_zajecia		int,
+    id_ucznia		int,
     czy_obecny		int,
     foreign key (id_zajecia) references t_zajecia(id_zajecia),
+    foreign key (id_ucznia) references t_uczniowie(id_ucznia),
     check (czy_obecny in (0, 1))
 );
+alter table t_obecnosci add constraint unique(id_zajecia,id_ucznia);
 
 -- Tabela z rozliczeniami uczniów
 drop table if exists t_rozliczenia_uczniow;
@@ -167,7 +173,8 @@ create table t_rozliczenia_uczniow(
     kwota_brutto	float,
     podatek			float,
     foreign key (id_ucznia) references t_uczniowie(id_ucznia),
-    foreign key (id_zajecia) references t_zajecia(id_zajecia)
+    foreign key (id_zajecia) references t_zajecia(id_zajecia),
+    unique (id_ucznia,id_zajecia)
 );
 
 -- Tabela z rozliczeniami nauczycieli
@@ -182,7 +189,8 @@ create table t_rozliczenia_nauczycieli(
     kwota_brutto	float,
     podatek			float,
     foreign key (id_nauczyciela) references t_nauczyciele(id_nauczyciela),
-    foreign key (id_zajecia) references t_zajecia(id_zajecia)
+    foreign key (id_zajecia) references t_zajecia(id_zajecia),
+    unique (id_nauczyciela,id_zajecia)
 );
 
 -- Tabela z wpłatami uczniów
@@ -213,9 +221,65 @@ create or replace view v_saldo_uczniow as
 
 
 -- Widok z rozliczeniem nauczycieli (należności-wpaty)
+drop view if exists saldo_nauczycieli;
 create or replace view v_saldo_nauczycieli as 
 	select data_operacji as data_operacji, -kwota as kwota, id_nauczyciela from t_wyplaty
     union
     select data_zobowiazania, kwota_brutto, id_nauczyciela from t_rozliczenia_nauczycieli;
 
+create or replace view v_ile_uczniow_w_grupie as
+select id_grupy,count(*) as liczba_uczniow from t_uczniowe_w_grupie 
+where data_od<=curdate() and coalesce(data_do,curdate())>=curdate()
+group by id_grupy;
 
+
+-- Widok generujący daty z zadanego przedziału
+create or replace view v_dates as 
+select gen_date from 
+(select adddate('1970-01-01',t4*10000 + t3*1000 + t2*100 + t1*10 + t0) gen_date from
+ (select 0 t0 union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t0,
+ (select 0 t1 union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t1,
+ (select 0 t2 union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t2,
+ (select 0 t3 union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t3,
+ (select 0 t4 union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t4) v
+where gen_date between '2017-01-01' and '2111-12-31';
+
+
+-- Widok zwraca szczegóły obecności na zajęciach wraz z datami zajęć i info o tym czy było zastepstwo i czy zajecia są odrabiane
+create or replace view v_obecnosci_det as
+select o.id_obecnosci,o.id_ucznia,o.czy_obecny,ug.id_grupy
+		, d.id_dlugosci
+        , d.dlugosc
+        , z.data_zajec as data_zajec_oczekiwana
+        , z.data_odrabiania as data_zajec_odrabiana
+        , z.id_nauczyciela as id_nauczyciela_oczekiwanego
+        , p.id_nauczyciela as id_nauczyciela_real
+        , o.id_zajecia
+		, count(ug.id_ucznia) spodziewana_liczba_uczniow
+	from t_obecnosci o
+	inner join t_zajecia z on z.id_zajecia=o.id_zajecia
+	inner join t_plany p on p.id_planu=z.id_planu
+	inner join t_uczniowe_w_grupie ug on ug.id_grupy=p.id_grupy
+		and ug.data_od<=z.data_zajec and coalesce(ug.data_do,z.data_zajec)>=z.data_zajec
+	inner join t_dlugosci d on d.id_dlugosci=p.id_dlugosci    
+	group by o.id_obecnosci,o.id_ucznia,o.czy_obecny,ug.id_grupy,d.id_dlugosci,d.dlugosc,coalesce(z.data_odrabiania,z.data_zajec),o.id_zajecia,z.data_odrabiania,z.id_nauczyciela,p.id_nauczyciela;
+    
+    
+    
+-- Lista obecności uczniów na danych zajęciach, wraz z kwotami do zapłaty za tę lekcję
+select a.id_zajecia,coalesce(a.data_zajec_odrabiana,a.data_zajec_oczekiwana) as data_zajec_real 
+	, a.czy_obecny
+	, concat(u.imie,' ',u.nazwisko) as uczen
+    , g.nazwa
+	, case when a.czy_obecny then su.cena_std else su.cena_nieob end as do_zaplaty 
+from v_obecnosci_det a
+inner join t_stawki_uczniow su 
+	on su.liczebnosc_grupy_od<=a.spodziewana_liczba_uczniow
+    and su.liczebnosc_grupy_do>=a.spodziewana_liczba_uczniow
+    and su.data_od<=coalesce(a.data_zajec_odrabiana,a.data_zajec_oczekiwana) 
+    and coalesce(su.data_do,coalesce(a.data_zajec_odrabiana,a.data_zajec_oczekiwana))>=coalesce(a.data_zajec_odrabiana,a.data_zajec_oczekiwana)
+    and su.id_dlugosci=a.id_dlugosci
+inner join t_uczniowie u on u.id_ucznia=a.id_ucznia    
+inner join t_grupy g on g.id_grupy=a.id_grupy
+where a.id_zajecia=9    
+;    
