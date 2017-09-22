@@ -195,3 +195,19 @@ inner join t_uczniowie u on u.id_ucznia=a.id_ucznia
 inner join t_grupy g on g.id_grupy=a.id_grupy
 where a.id_zajecia between 1 and 50
 ;
+
+-- Utwórz losowo wpisy o wpłatach uczniów
+insert into t_wplaty(id_ucznia,kwota,data_zaksiegowania)
+select u.id_ucznia,case when rand()<0.7 then sum(v.kwota) else floor(sum(v.kwota)*rand()) end as paid,curdate()
+from v_saldo_uczniow v
+inner join t_uczniowie u on u.id_ucznia=v.id_ucznia
+where u.id_ucznia%3!=0
+group by u.id_ucznia
+order by u.id_ucznia;
+
+-- Wyświetl saldo rozliczeń uczniów, przy każdym uczniu grupa, z której jest
+select concat(u.imie,' ',u.nazwisko) uczen,sum(v.kwota) as saldo 
+from v_saldo_uczniow v
+inner join t_uczniowie u on u.id_ucznia=v.id_ucznia
+group by u.id_ucznia
+order by concat(u.imie,' ',u.nazwisko);
