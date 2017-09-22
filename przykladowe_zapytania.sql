@@ -142,18 +142,8 @@ inner join t_stawki_nauczycieli sn on sn.id_dlugosci=p.id_dlugosci
 group by concat(n.imie,' ',n.nazwisko);
 
 
--- Widok techniczny z datami 
-create or replace view v_dates as 
-select gen_date from 
-(select adddate('1970-01-01',t4*10000 + t3*1000 + t2*100 + t1*10 + t0) gen_date from
- (select 0 t0 union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t0,
- (select 0 t1 union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t1,
- (select 0 t2 union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t2,
- (select 0 t3 union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t3,
- (select 0 t4 union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t4) v
-where gen_date between '2017-01-01' and '2111-12-31';
-
--- Zapytanie uzupełnia tabelę z zajęciami w zadanym okresie dat
+-- Zapytanie uzupełnia tabelę z zajęciami w zadanym okresie dat 
+#(powinno się uzupełniać w dniu zajęć dla każdych zajęc osobno lub hurtem na cały dzień)
 insert into t_zajecia(data_zajec,id_planu,id_nauczyciela,czy_odbyte,czy_odrabiane)
 select v.gen_date, p.id_planu, p.id_nauczyciela,1,0
 from v_dates v
@@ -196,7 +186,7 @@ inner join t_grupy g on g.id_grupy=a.id_grupy
 where a.id_zajecia between 1 and 50
 ;
 
--- Utwórz losowo wpisy o wpłatach uczniów
+-- Utwórz losowo wpisy o wpłatach uczniów w oparciu o ich saldo bieżące
 insert into t_wplaty(id_ucznia,kwota,data_zaksiegowania)
 select u.id_ucznia,case when rand()<0.7 then sum(v.kwota) else floor(sum(v.kwota)*rand()) end as paid,curdate()
 from v_saldo_uczniow v
@@ -211,3 +201,29 @@ from v_saldo_uczniow v
 inner join t_uczniowie u on u.id_ucznia=v.id_ucznia
 group by u.id_ucznia
 order by concat(u.imie,' ',u.nazwisko);
+
+-- wyświetl plan tygodniowy zajęć dla wskazanego ucznia i cenę za lekcję
+select u.imie, u.nazwisko, dr.nazwa_dnia, p.godzina_rozp, p.godzina_konc, g.nazwa
+	, concat(su.cena_std,' PLN') as cena, concat(su.cena_nieob,' PLN') as cena_nieobecnosc
+from t_plany p
+inner join t_uczniowe_w_grupie ug on ug.id_grupy=p.id_grupy
+	and ug.data_od<=curdate() and coalesce(ug.data_do,curdate())>=curdate()
+inner join t_grupy g on g.id_grupy=ug.id_grupy
+inner join t_uczniowie u on u.id_ucznia=ug.id_ucznia
+inner join t_dni_robocze dr on dr.id_dnia=p.id_dnia
+inner join v_ile_uczniow_w_grupie vi on vi.id_grupy=ug.id_grupy
+inner join t_stawki_uczniow su on su.data_od<=curdate() and coalesce(su.data_do,curdate())>=curdate()
+	and su.id_dlugosci=p.id_dlugosci and su.liczebnosc_grupy_od<=vi.liczba_uczniow and su.liczebnosc_grupy_do>=vi.liczba_uczniow
+where ug.id_ucznia=41
+	and p.id_semestru=1
+order by p.id_dnia, p.godzina_rozp
+    ;
+    
+-- wyświetl frekwencję uczniów w zadanym okresie (na ilu lekcjach był, ile opuścił, frekwencja w %)
+select u.imie, u.nazwisko, sum(o.czy_obecny) obecnosci, sum(1-o.czy_obecny) nieobecnosci
+	, round((sum(o.czy_obecny)/count(o.czy_obecny))*100.00,2) as "frekwencja_%"
+from t_obecnosci o
+inner join t_zajecia z on z.id_zajecia=o.id_zajecia
+inner join t_uczniowie u on u.id_ucznia=o.id_ucznia
+where z.data_zajec between '2017-09-01' and '2017-09-15' 
+group by u.imie, u.nazwisko
