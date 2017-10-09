@@ -149,7 +149,7 @@ select v.gen_date, p.id_planu, p.id_nauczyciela,1,0
 from v_dates v
 inner join t_dni_robocze dr on dr.id_dnia=dayofweek(v.gen_date)
 inner join t_plany p on p.id_dnia=dayofweek(v.gen_date)
-where v.gen_date between '2017-09-01' and '2017-09-15';
+where v.gen_date between '2017-09-01' and '2017-09-07';
 
 
 -- Zapytanie losowo ustawia obecności na zajęciach uczniów w zadanym okresie
@@ -161,9 +161,10 @@ inner join t_plany p on p.id_planu=t.id_planu
 inner join t_uczniowe_w_grupie ug on ug.id_grupy=p.id_grupy
 where 
 	ug.data_od<=t.data_zajec and coalesce(ug.data_do,t.data_zajec)>=t.data_zajec
-    and t.data_zajec between '2017-09-01' and '2017-09-15'
+    and t.data_zajec between '2017-09-01' and '2017-09-17'
 ;
 
+select max(id_zajecia) from t_zajecia;
 
 -- Zapytanie wstawia wpisy do tabli z rozliczeniami uczniów za podane zajęcia
 insert into t_rozliczenia_uczniow(id_zajecia, id_ucznia, data_utworzenia, data_zobowiazania, kwota_netto,podatek,kwota_brutto)

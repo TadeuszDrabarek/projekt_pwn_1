@@ -3,7 +3,7 @@ drop database if exists pwn_projekt_szkola;  -- jeżeli istnieje to usuwanie
 create database pwn_projekt_szkola;
 
 -- Przełączanie na utworzoną bazę danych
-use pwn_projekt_szkola;
+use pwn_projekt_szkola_test;
 
 -- *** Tworzenie struktur danych ***
 -- tabela uczniowie
