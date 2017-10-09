@@ -283,3 +283,44 @@ inner join t_uczniowie u on u.id_ucznia=a.id_ucznia
 inner join t_grupy g on g.id_grupy=a.id_grupy
 where a.id_zajecia=9    
 ;    
+
+
+-- tabele do obsłgi aplikacji w Pythonie
+-- tabela z rolami uzytkowników
+create table app_role(
+	roleid varchar(10) primary key,
+    rolename varchar(100)
+);
+
+-- tabela z użytkownikami
+create table app_users(
+	userid integer auto_increment primary key,
+    login varchar(100) not null,
+    email varchar(100) not null,
+    pass varchar(32) not null,
+    indactive integer default 1,
+    datcre date,
+    usercre integer,
+    username varchar(100),
+    roleid varchar(10) ,
+    foreign key (usercre) references app_users(userid),
+    foreign key (releid) references app_role(roleid),
+    check (ind_active in (0,1))
+);
+
+-- tabela z opcjami w menu
+create table app_menu(
+	menuid varchar(10)  primary key,
+    pos integer default 1,
+    caption varchar(50) not null,
+    description varchar(400),
+    parent varchar(10),
+    foreign key (parent) references app_menu(menuid)
+);
+
+-- tabela z przypisaniem uprawnień do opcji w menu
+create table app_menu_role(
+	menuid varchar(10),
+    roleid varchar(10),
+    primary key (menuid,roleid)
+);

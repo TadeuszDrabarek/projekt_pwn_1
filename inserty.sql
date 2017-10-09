@@ -418,4 +418,51 @@ update t_dni_robocze set nazwa_dnia='Czwartek' where id_dnia=5;
 update t_dni_robocze set nazwa_dnia='Piątek' where id_dnia=6;
 update t_dni_robocze set nazwa_dnia='Sobota' where id_dnia=7;
 
+
+-- Uzupełnianie tabel aplikacji
+
+-- dodanie głównej roli administracyjnej
+insert into app_role values('admin','Główna rola systemowa');
+insert into app_role values('none','Rola niezalogowanego użytkownika');
+insert into app_role values('simple','Rola bez uprawnień');
+
+-- dodanie głownego uzytkownika
+insert into app_users(login,email,pass,datcre,username,roleid) 
+	values('admin','admin@admin','21232f297a57a5a743894a0e4a801fc3',curdate(),'Administrator','admin');
+ 
+ -- dodanie opcji do menu
+insert into app_menu(menuid,pos,caption) values ('MAIN',0,'Menu główne');
+insert into app_menu(menuid,pos,caption,parent) values ('EXIT',-2,'Wyjście','MAIN');
+insert into app_menu(menuid,pos,caption,parent) values ('GETTIME',998,'Podaj czas','MAIN');
+insert into app_menu(menuid,pos,caption,parent) values ('LOGOUT',997,'Wyloguj','MAIN');
+insert into app_menu(menuid,pos,caption,parent) values ('LOGIN',996,'Zaloguj','MAIN');
+
+insert into app_menu(menuid,pos,caption,parent) values ('ADU',995,'Administracja użytkownikami','MAIN');
+insert into app_menu(menuid,pos,caption,parent) values ('ACU',10,'Utwórz użytkownika','ADU');
+insert into app_menu(menuid,pos,caption,parent) values ('ACR',11,'Ustal/zmień rolę uzytkownika','ADU');
+insert into app_menu(menuid,pos,caption,parent) values ('DIU',12,'Zablokuj użytkownika','ADU');
+insert into app_menu(menuid,pos,caption,parent) values ('CHP',13,'Zmień rolę użytkownika','ADU');
+
+
+-- dodanie uprawnień do menu
+insert app_menu_role(roleid,menuid) values('none','EXIT');
+insert app_menu_role(roleid,menuid) values('none','GETTIME');
+insert app_menu_role(roleid,menuid) values('none','LOGIN');
+insert app_menu_role(roleid,menuid) values('admin','EXIT');
+insert app_menu_role(roleid,menuid) values('admin','LOGOUT');
+insert app_menu_role(roleid,menuid) values('admin','GETTIME');
+
+insert app_menu_role(roleid,menuid) values('simple','EXIT');
+insert app_menu_role(roleid,menuid) values('simple','LOGOUT');
+insert app_menu_role(roleid,menuid) values('simple','GETTIME');
+
+insert app_menu_role(roleid,menuid) value('admin','ADU');
+insert app_menu_role(roleid,menuid) value('admin','ACU');
+insert app_menu_role(roleid,menuid) value('admin','ACR');
+insert app_menu_role(roleid,menuid) value('admin','DIU');
+insert app_menu_role(roleid,menuid) value('admin','CHP');
+
+delete from app_menu_role where menuid='EXIT';
+delete from app_menu where menuid='EXIT';
+
 commit;
