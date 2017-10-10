@@ -41,4 +41,20 @@ def loadmenusql(role,branch):
     ) a
     order by a.pos;
     """
-    return s%(branch,role,branch)
+    return s%(role,role,branch)
+
+def mnuname(s):
+    return "select caption from app_menu where menuid='%s';"%(s)
+
+def loadstudents():
+    return "select id_ucznia, imie, nazwisko,adres from t_uczniowie;"
+
+def checkstudentid(s):
+    return "select id_ucznia, imie, nazwisko,adres from t_uczniowie where id_ucznia=%i;"%(s)
+
+def updatestudent(idu,imie,nazwisko,adres):
+    return """
+    update t_uczniowie 
+        set imie='%s', nazwisko='%s', adres='%s' 
+        where id_ucznia=%i;
+    """%(imie,nazwisko,adres,idu)

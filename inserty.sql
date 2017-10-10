@@ -443,6 +443,9 @@ insert into app_menu(menuid,pos,caption,parent) values ('ACR',11,'Ustal/zmień r
 insert into app_menu(menuid,pos,caption,parent) values ('DIU',12,'Zablokuj użytkownika','ADU');
 insert into app_menu(menuid,pos,caption,parent) values ('CHP',13,'Zmień rolę użytkownika','ADU');
 
+insert into app_menu(menuid,pos,caption,parent) values ('SEKR',20,'Sekretariat','MAIN');
+insert into app_menu(menuid,pos,caption,parent) values ('STUDENTS',20,'Administracja uczniami','SEKR');
+
 
 -- dodanie uprawnień do menu
 insert app_menu_role(roleid,menuid) values('none','EXIT');
@@ -451,6 +454,8 @@ insert app_menu_role(roleid,menuid) values('none','LOGIN');
 insert app_menu_role(roleid,menuid) values('admin','EXIT');
 insert app_menu_role(roleid,menuid) values('admin','LOGOUT');
 insert app_menu_role(roleid,menuid) values('admin','GETTIME');
+insert app_menu_role(roleid,menuid) values('admin','SEKR');
+insert app_menu_role(roleid,menuid) values('admin','STUDENTS');
 
 insert app_menu_role(roleid,menuid) values('simple','EXIT');
 insert app_menu_role(roleid,menuid) values('simple','LOGOUT');

@@ -5,6 +5,7 @@
 from dbconnection import sqlmapper
 from db import DB
 from appusers import User, AppUsers
+from sekretariat import Sekretariat
 from menu import Menu
 import hashlib
 import time
@@ -46,9 +47,14 @@ class MainMenu(Menu):
             self.print_now()
         elif kw=='ADU':
             submenu=AppUsers(self.a, self.user)
-            submenu.loadmenu('ADU')
+            #submenu.loadmenu('ADU')
             submenu.showmenu()
             del submenu
+        elif kw=='SEKR':
+            submenu=Sekretariat(self.a, self.user)
+            #submenu.loadmenu('SEKR')
+            submenu.showmenu()
+            del submenu        
         elif kw=='EXIT':
             if not input('Czy na pewno chcesz wyjść (T/N) ?').upper()=='T':
                 return 'DONT EXIT'
@@ -98,7 +104,7 @@ db=DB();
 user=User()
 
 a=MainMenu(db,user)
-a.loadmenu()
+#a.loadmenu()
 a.showmenu()
 
 db.dbclose()

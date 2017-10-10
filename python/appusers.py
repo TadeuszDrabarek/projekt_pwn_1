@@ -17,7 +17,7 @@ class User:
 class AppUsers(Menu):
     
     def __init__(self,db,u):
-        super().__init__(db,u,True)
+        super().__init__(db,u,True,'ADU')
         #self.=db
     def doit(self,lw,ex):
         kw=super().doit(lw,ex)

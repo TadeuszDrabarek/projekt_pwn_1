@@ -4,31 +4,38 @@ import pymysql
 import os
 
 class Menu:
-    def __init__(self,a,u,hp=False):
+    def __init__(self,a,u,hp=False,branch='MAIN'):
         self.a=a
         self.menu=[]
         self.user=u
-        self.hp=hp
-    def loadmenu(self,branch='MAIN'):
+        self.hp=hp    
+        self.branch=branch
+        self.a.select(sqlmapper.mnuname(branch))
+        self.mnuname=self.a.result[0][0]        
+        self.loadmenu()
+    def loadmenu(self):
         self.menu.clear()
+        branch=self.branch
         if self.hp:
             self.menu.append({'id':'BACK', 'caption':'<Powrót', 'hch':1, 'branch':''})
         else:
             self.menu.append({'id':'EXIT', 'caption':'<<Wyjście', 'hch':0, 'branch':''})
+        
         self.a.select(sqlmapper.loadmenusql(self.user.userrole,branch))
-        if (len(self.a.result)>1):        
+        if (len(self.a.result)>0): 
             for i in self.a.result:
                 self.menu.append({'id':i[0], 'caption':i[1], 'hch':i[2], 'branch':i[3]})        
                 
     def printmenu(self):
-        print('Menu:')
+        print('Menu %s:'%(self.mnuname.upper()))
         for key,value in enumerate(self.menu):
             print(('%3i-%s(%s) '%(key,value['caption'],value['id']))+('...' if value['hch']>0 else ''), end='')
         print('')  
     
-    def doit(self,lw,ex):
+    def doit(self,lw,ex,cls=True):
         #super().doit(kw)
-        os.system("cls")
+        if cls:
+            os.system("cls")
         print('*'*20)
         kw=self.menu[lw]['id'].upper()
         print('Twój wybór :',self.menu[lw]['caption'].upper())
