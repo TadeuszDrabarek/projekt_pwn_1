@@ -4,10 +4,10 @@ import pymysql
 import hashlib
 from menu import Menu
 
-class Uczniowie(Menu):
+class Nauczyciele(Menu):
     
     def __init__(self,db,u):
-        super().__init__(db,u,True,'STUDENTS')
+        super().__init__(db,u,True,'TEACHERS')
         #self.loaddata()
         self.loadmenu()
         self.showmenu()
@@ -23,13 +23,13 @@ class Uczniowie(Menu):
     def doit(self,lw,ex):
         kw=super().doit(lw,ex,False)
         if kw!='EXIT':
-            if kw=='LIST':          #wypisz listę uczniów
+            if kw=='LIST':          #wypisz listę 
                 self.loaddata()
                 print(self)
-            elif kw=='ADD':         #dodaj ucznia
+            elif kw=='ADD':         #dodaj 
                 self.add(ex)
                 ''
-            elif kw=='DEL':         #usuń ucznia
+            elif kw=='DEL':         #usuń 
                 #self.user_change_role(ex)                
                 ''
             elif kw=='EDIT':         #modyfikuj
@@ -41,19 +41,21 @@ class Uczniowie(Menu):
         super().menuhelp()
     
     def loaddata(self):
-        self.a.select(sqlmapper.loadstudents())     
+        self.a.select(sqlmapper.loadteachers())     
         
     def add(self,ex):
-        print('Uzupełnij dane ucznia (jeżel nie podasz którejś wartości - nie dodasz ucznia):')
+        print('Uzupełnij dane nauczyciela (jeżel nie podasz którejś wartości - przerwiesz wprowadzanie):')
         i=1
         wybor=''
-        while (i<=3):
+        while (i<=4):
             if i==1:
-                pytanie='Podaj nowe imię :'
+                pytanie='Podaj imię :'
             elif i==2:
-                pytanie='Podaj nowe nazwisko :'
+                pytanie='Podaj nazwisko :'
+            elif i==3:
+                pytanie='Podaj adres :'            
             else:
-                pytanie='Podaj nowy adres :'
+                pytanie='Podaj numer konta :'
             while (True):
                 #print(i)
                 wejscie=input(pytanie)
@@ -70,8 +72,10 @@ class Uczniowie(Menu):
                         imie=wejscie
                     elif i==2:
                         nazwisko=wejscie
-                    else:
+                    elif i==3:
                         adres=wejscie
+                    else:
+                        numer_konta=wejscie
                     #print ('stare i',i)
                     i+=1
                     #print ('nowe i',i)
@@ -80,29 +84,29 @@ class Uczniowie(Menu):
                 break
         if wybor!='Q':
             print('Zapisuję dane...',end='')   
-            if self.a.execute(sqlmapper.addstudent(imie,nazwisko,adres)):
+            if self.a.execute(sqlmapper.addteacher(imie,nazwisko,adres,numer_konta)):
                 idu=self.a.get_last_id()
-                self.a.select(sqlmapper.checkstudentid(idu))
+                self.a.select(sqlmapper.checkteacherid(idu))
                 print('Wprowadzono:')
                 print(self)   
         else:
-            print('Rezygnacja z wprowadzania nowego ucznia')
+            print('Rezygnacja z wprowadzania nowego nauczyciela')
             
     def edit(self,ex):
         idus=""
         if len(ex)<2:
             while(True):
                 while(True):
-                    idus=input('Podaj identyfikator ucznia [Enter - rezygnacja]:')
+                    idus=input('Podaj identyfikator nauczyciela [Enter-rezygnacja]:')
                     if idus.isdigit():
                         idu=int(idus)
                         break
                     if idus=="":
-                        break                    
+                        break
                     print('Identyfikator musi być liczbowy')
                 if idus=="":
-                    break                
-                if self.check_studentid(idu):
+                        break                
+                if self.check_teacherid(idu):
                     break
                 print('Identyfikator nie istnieje')
         else:
@@ -112,35 +116,38 @@ class Uczniowie(Menu):
             else:
                 print('Identyfikator musi być liczbowy')
                 return
-            if not self.check_studentid(idu):
+            if not self.check_teacherid(idu):
                 print('Identyfikator nie istnieje')            
                 return
         if idus=="":
-            return        
+            return
         print(self)
         imie=input('Podaj nowe imię ([Enter] - pozostawia obecne :')
         nazwisko=input('Podaj nowe nazwisko ([Enter] - pozostawia obecne :')
         adres=input('Podaj nowy adres ([Enter] - pozostawia obecny :')
+        numer_konta=input('Podaj nowy numer konta ([Enter] - pozostawia obecny :')
         if imie=="":
             imie=self.a.result[0][1]
         if nazwisko=="":
             nazwisko=self.a.result[0][2]
         if adres=="":
             adres=self.a.result[0][3]
+        if numer_konta=="":
+            numer_konta=self.a.result[0][4]
         print('Wprowadzam zmianę...', end='')
-        self.a.execute(sqlmapper.updatestudent(idu,imie,nazwisko,adres))
+        self.a.execute(sqlmapper.updateteacher(idu,imie,nazwisko,adres,numer_konta))
         
             
-    def check_studentid(self,idu):
-        self.a.select(sqlmapper.checkstudentid(idu))
+    def check_teacherid(self,idu):
+        self.a.select(sqlmapper.checkteacherid(idu))
         return len(self.a.result)>0
             
         
     def __str__(self):
-        s='%8s|%-20s|%-30s|%-40s\n'%('Id','Imię','Nazwisko','Adres')
-        s+='-'*101+'\n'
+        s='%8s|%-20s|%-20s|%-30s|%20s\n'%('Id','Imię','Nazwisko','Adres','Numer konta')
+        s+='-'*111+'\n'
         for row in self.a.result:
-            s+='%8i|%-20s|%-30s|%-40s\n'%(row[0],row[1],row[2],row[3])
+            s+='%8i|%-20s|%-20s|%-30s|%20s\n'%(row[0],row[1],row[2],row[3],row[4])
         return s 
     
     

@@ -106,8 +106,8 @@ select * from (
 	from app_menu_role amr
 	inner join app_menu am on am.menuid=amr.menuid
 	left join app_menu child on child.parent=am.menuid
-	left join app_menu_role ach on child.menuid=ach.menuid and ach.roleid='MAIN'
-	where amr.roleid='simple' and am.parent='MAIN'
+	left join app_menu_role ach on child.menuid=ach.menuid and ach.roleid='admin'
+	where amr.roleid='admin' and am.parent='SEKR'
 	group by amr.menuid,am.caption, am.pos
 ) a
 order by a.pos;
@@ -125,5 +125,14 @@ select userid,login,email,datcre,username,roleid,
 case when indactive=1 then 'aktywny' else 'nieaktywny' end as status
 from app_users;
 
-update app_users set roleid='simple' where login='tdrabarek'
+update app_users set roleid='simple' where login='tdrabarek';
 
+select id_ucznia, imie, nazwisko,adres from t_uczniowie;
+
+
+select caption from app_menu where menuid='MAIN';
+
+select * from t_uczniowie where id_ucznia=2;
+
+
+update t_uczniowie set imie='Brandon1', nazwisko='Acri1', adres='Adres1' where id_ucznia=2;

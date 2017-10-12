@@ -42,6 +42,11 @@ class DB:
             self.conn.rollback()
             print('Błąd!')
             return False
+    def get_last_id(self):
+        if self.select('select last_insert_id();'):
+            return self.result[0][0]
+        else:
+            return -1
     def insert(self,imie,nazwisko,email,haslo):
         sql="insert into users(name,lastname,email,password) values('%s','%s','%s','%s');"%(imie,nazwisko,email,haslo)
         print(sql)

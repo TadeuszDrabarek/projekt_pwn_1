@@ -15,3 +15,14 @@ case when indactive=1 then 'aktywny' else 'nieaktywny' end as status
 from app_users
 where indactive in %s
 """
+
+loadoneuser="""
+select userid,login,email,datcre,username,roleid,
+case when indactive=1 then 'aktywny' else 'nieaktywny' end as status
+from app_users
+where login='%s'
+"""
+
+userchangerole="""
+update app_users set roleid='%s' where login='%s';
+"""

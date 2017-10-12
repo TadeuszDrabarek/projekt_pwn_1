@@ -2,6 +2,7 @@
 from dbconnection import dbconn
 from dbmapper import sekretariat
 from uczniowie import Uczniowie
+from nauczyciele import Nauczyciele
 import pymysql
 import hashlib
 from menu import Menu
@@ -18,7 +19,9 @@ class Sekretariat(Menu):
                 #self.print_userlist(ex)
                 u=Uczniowie(self.a, self.user)               
                 del u
-            
+            elif kw=='TEACHERS':        #Administracja nauczycielami
+                n=Nauczyciele(self.a, self.user)               
+                del n
         return kw
     
     def menuhelp(self):

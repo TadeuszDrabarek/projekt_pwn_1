@@ -46,6 +46,8 @@ def loadmenusql(role,branch):
 def mnuname(s):
     return "select caption from app_menu where menuid='%s';"%(s)
 
+# Uczniowie
+
 def loadstudents():
     return "select id_ucznia, imie, nazwisko,adres from t_uczniowie;"
 
@@ -58,3 +60,52 @@ def updatestudent(idu,imie,nazwisko,adres):
         set imie='%s', nazwisko='%s', adres='%s' 
         where id_ucznia=%i;
     """%(imie,nazwisko,adres,idu)
+
+def addstudent(imie,nazwisko,adres):
+    return """
+    insert into t_uczniowie(imie, nazwisko, adres) 
+    values('%s','%s','%s');
+    """%(imie,nazwisko,adres)
+
+# Nauczyciele
+
+def loadteachers():
+    return "select id_nauczyciela, imie, nazwisko,adres, numer_konta from t_nauczyciele"
+
+def checkteacherid(s):
+    return "select id_nauczyciela, imie, nazwisko,adres, numer_konta from t_nauczyciele where id_nauczyciela=%i;"%(s)
+
+def updateteacher(idu,imie,nazwisko,adres,numer_konta):
+    return """
+    update t_nauczyciele 
+        set imie='%s', nazwisko='%s', adres='%s', numer_konta='%s'
+        where id_nauczyciela=%i;
+    """%(imie,nazwisko,adres,numer_konta,idu)
+
+def addteacher(imie,nazwisko,adres, numer_konta):
+    return """
+    insert into t_nauczyciele(imie, nazwisko, adres, numer_konta) 
+    values('%s','%s','%s','%s');
+    """%(imie,nazwisko,adres,numer_konta)
+
+
+# Role
+
+def loadroles():
+    return "select roleid, rolename from app_role"
+
+def checkroleid(s):
+    return "select roleid, rolename from app_role where roleid='%s';"%(s)
+
+def updaterole(roleid,rolename):
+    return """
+    update app_role 
+        set roleid='%s', rolename='%s'
+        where roleid='%s';
+    """%(roleid, rolename, roleid)
+
+def addrole(roleid, rolename):
+    return """
+    insert into app_role(roleid, rolename) 
+    values('%s','%s');
+    """%(roleid, rolename)

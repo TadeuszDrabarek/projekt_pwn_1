@@ -439,12 +439,13 @@ insert into app_menu(menuid,pos,caption,parent) values ('LOGIN',996,'Zaloguj','M
 
 insert into app_menu(menuid,pos,caption,parent) values ('ADU',995,'Administracja użytkownikami','MAIN');
 insert into app_menu(menuid,pos,caption,parent) values ('ACU',10,'Utwórz użytkownika','ADU');
-insert into app_menu(menuid,pos,caption,parent) values ('ACR',11,'Ustal/zmień rolę uzytkownika','ADU');
+insert into app_menu(menuid,pos,caption,parent) values ('APPROLES',11,'Administracja rolami aplikacji','ADU');
 insert into app_menu(menuid,pos,caption,parent) values ('DIU',12,'Zablokuj użytkownika','ADU');
 insert into app_menu(menuid,pos,caption,parent) values ('CHP',13,'Zmień rolę użytkownika','ADU');
 
 insert into app_menu(menuid,pos,caption,parent) values ('SEKR',20,'Sekretariat','MAIN');
 insert into app_menu(menuid,pos,caption,parent) values ('STUDENTS',20,'Administracja uczniami','SEKR');
+insert into app_menu(menuid,pos,caption,parent) values ('TEACHERS',21,'Administracja nauczycielami','SEKR');
 
 
 -- dodanie uprawnień do menu
@@ -456,6 +457,8 @@ insert app_menu_role(roleid,menuid) values('admin','LOGOUT');
 insert app_menu_role(roleid,menuid) values('admin','GETTIME');
 insert app_menu_role(roleid,menuid) values('admin','SEKR');
 insert app_menu_role(roleid,menuid) values('admin','STUDENTS');
+insert app_menu_role(roleid,menuid) values('admin','TEACHERS');
+insert app_menu_role(roleid,menuid) values('admin','APPROLES');
 
 insert app_menu_role(roleid,menuid) values('simple','EXIT');
 insert app_menu_role(roleid,menuid) values('simple','LOGOUT');
@@ -463,7 +466,7 @@ insert app_menu_role(roleid,menuid) values('simple','GETTIME');
 
 insert app_menu_role(roleid,menuid) value('admin','ADU');
 insert app_menu_role(roleid,menuid) value('admin','ACU');
-insert app_menu_role(roleid,menuid) value('admin','ACR');
+-- insert app_menu_role(roleid,menuid) value('admin','ACR');
 insert app_menu_role(roleid,menuid) value('admin','DIU');
 insert app_menu_role(roleid,menuid) value('admin','CHP');
 

@@ -2,6 +2,7 @@
 from dbconnection import dbconn, sqlmapper
 import pymysql
 import os
+import sys
 
 class Menu:
     def __init__(self,a,u,hp=False,branch='MAIN'):
@@ -56,7 +57,12 @@ class Menu:
             w=input(s)
             if (w.upper()=='QUIT'):
                 break
-            if (w.isdigit()):
+            elif (w.upper())=='HALT':
+                self.a.dbclose()
+                sys.exit()
+            elif (w.upper()=='CLS'):
+                os.system("cls")
+            elif (w.isdigit()):
                 lw=int(w)
                 if (lw>=0) and lw<len(self.menu):
                     kw=self.doit(lw,[])

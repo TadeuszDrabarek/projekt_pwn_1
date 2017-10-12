@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from dbconnection import dbconn
 from dbmapper import appusers
+from role import Role
 import pymysql
 import hashlib
 from menu import Menu
@@ -26,8 +27,13 @@ class AppUsers(Menu):
                 self.print_userlist(ex)
             elif kw=='ACU':
                 self.add_user(ex)
-            elif kw=='ACR':
-                self.user_change_role(ex)                
+            elif kw=='CHP':
+                self.user_change_role(ex) 
+            elif kw=='APPROLES':
+                r=Role(self.a, self.user) 
+                r.loadmenu()
+                r.showmenu()
+                del r
         return kw
     
     def menuhelp(self):
@@ -35,25 +41,52 @@ class AppUsers(Menu):
         print('LST [active|inactive|all] | [like wzorzec]')
         print('ACU [nazwa [login [email [password]]]]    ')
         print('       uwaga: nazwa, logi, email, password nie mogą zawierać spacji !')
+        print('CHP [login [new_role_ID]]')
     
     def user_change_role(self,ex):
-        w=input('Podaj login usera :')
+        if len(ex)<2:
+            self.read_userlist('(1,0)')
+            print('Dostępne loginy:')
+            print(self)
+            w=input('Podaj login usera :')
+        else:
+            w=ex[1]
         if not self.check_if_login_exists(w):
             print('Użytkownik o takim loginie nie istnieje !')
             return
-        print ('To do')
+        self.read_oneuser(w)
+        print(self)
+        
+        r=Role(self.a, self.user)
+        if len(ex)<3:
+            print ('Lista dostępnych ról:')
+            print(r)
+            roleid=input('Wybierz rolę dla użytkownika (Podaj ID Roli):')
+        else:
+            roleid=ex[2]
+        if not r.check_roleid(roleid):
+            print("Nie ma takiej roli !")
+            del r
+            return
+        print('Zmieniam rolę...',end='')
+        self.a.execute(appusers.userchangerole%(roleid,w))
         return
         
     def add_user(self,ex):
         if len(ex)<2:
-            name   =input('Podaj nazwę (np. imię i nazwisko:')
+            name   =input('Podaj nazwę (np. imię i nazwisko) [Enter] - przerywa:')
+            if name=="":
+                return
         else:
             name=ex[1]
         if len(ex)<3:
             while(True):
-                login  =input('Podaj login                     :')
+                login  =input('Podaj login [Enter] - przerywa :')
+                if login=="":
+                    return
                 if not self.check_if_login_exists(login):
                     break
+                print('Użytkownik o takim loginie już istnieje, podaj inny !')
         else:
             if self.check_if_login_exists(ex[2]):
                 print('Użytkownik o takim loginie już istnieje !')
@@ -61,11 +94,15 @@ class AppUsers(Menu):
             else:
                 login=ex[2]
         if len(ex)<4:
-            email  =input('Podaj email                     :')
+            email  =input('Podaj email [Enter] - przerywa :')
+            if email=="":
+                return
         else:
             email=ex[3]
         if len(ex)<5:
-            passwdtmp =input('Podaj hasło                     :')
+            passwdtmp =input('Podaj hasło [Enter] - przerywa:')
+            if passwdtmp=="":
+                return
         else:
             passwdtmp=ex[4]
         passwd=hashlib.md5(str(passwdtmp).encode("utf-8")).hexdigest()
@@ -77,6 +114,9 @@ class AppUsers(Menu):
         if len(self.a.result)>0:
             return True
         return False
+    
+    def read_oneuser(self,userlogin):
+        return self.a.select(appusers.loadoneuser%(userlogin))         
     
     def read_userlist(self,mode):
         return self.a.select(appusers.listuserssql%(mode))     
