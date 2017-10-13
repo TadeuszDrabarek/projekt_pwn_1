@@ -1,6 +1,7 @@
 
 -- Wypisz imiona i nazwiska uczniów w grupach w bieżącym semestrze
-select s.nazwa,g.nazwa,u.imie,u.nazwisko 
+create view v_grupy_i_uczniowie_w_bs as
+select s.nazwa nazwa_s,g.nazwa nazwa_g,u.imie,u.nazwisko 
 from t_grupy g
 inner join t_semestry s on s.id_semestru=g.id_semestru
 inner join t_uczniowe_w_grupie ug on ug.id_grupy=g.id_grupy
@@ -8,6 +9,8 @@ inner join t_uczniowie u on u.id_ucznia=ug.id_ucznia
 where s.data_od<curdate() and coalesce(s.data_do,curdate())>=curdate()
 and ug.data_od<curdate() and coalesce(ug.data_do,curdate())>=curdate()
 order by s.nazwa,g.nazwa,u.nazwisko, u.imie;
+
+select * from v_grupy_i_uczniowie_w_bs;
 
 -- Wypisz ile uczniów jest w grupach w bieżącym semestrze (na dziś)
 -- oraz jaka jest stawka za lekcję dla ucznia w tej grupie (zależy od liczebności grupy!)

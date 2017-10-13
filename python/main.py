@@ -28,7 +28,7 @@ class MainMenu(Menu):
         #os.system("cls")
         #print('*'*20)
         #print('Twój wybór :',kw)
-        if kw=='LOGIN':       #zalogu się
+        if kw=='LOGIN':       #zaloguj się
             if not (self.user.loggedin):
                 if not self.log_in(ex):
                     print('Przekroczyłeś limit prób logowania!')

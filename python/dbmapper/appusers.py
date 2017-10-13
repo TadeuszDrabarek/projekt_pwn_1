@@ -26,3 +26,11 @@ where login='%s'
 userchangerole="""
 update app_users set roleid='%s' where login='%s';
 """
+
+userdisable="""
+update app_users set indactive=%i where login='%s';
+"""
+
+userchpasswd="""
+update app_users set pass='%s' where login='%s';
+"""

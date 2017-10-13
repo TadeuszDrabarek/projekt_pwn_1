@@ -432,7 +432,6 @@ insert into app_users(login,email,pass,datcre,username,roleid)
  
  -- dodanie opcji do menu
 insert into app_menu(menuid,pos,caption) values ('MAIN',0,'Menu główne');
-insert into app_menu(menuid,pos,caption,parent) values ('EXIT',-2,'Wyjście','MAIN');
 insert into app_menu(menuid,pos,caption,parent) values ('GETTIME',998,'Podaj czas','MAIN');
 insert into app_menu(menuid,pos,caption,parent) values ('LOGOUT',997,'Wyloguj','MAIN');
 insert into app_menu(menuid,pos,caption,parent) values ('LOGIN',996,'Zaloguj','MAIN');
@@ -441,7 +440,9 @@ insert into app_menu(menuid,pos,caption,parent) values ('ADU',995,'Administracja
 insert into app_menu(menuid,pos,caption,parent) values ('ACU',10,'Utwórz użytkownika','ADU');
 insert into app_menu(menuid,pos,caption,parent) values ('APPROLES',11,'Administracja rolami aplikacji','ADU');
 insert into app_menu(menuid,pos,caption,parent) values ('DIU',12,'Zablokuj użytkownika','ADU');
-insert into app_menu(menuid,pos,caption,parent) values ('CHP',13,'Zmień rolę użytkownika','ADU');
+insert into app_menu(menuid,pos,caption,parent) values ('EIU',12,'Odblokuj użytkownika','ADU');
+insert into app_menu(menuid,pos,caption,parent) values ('CHRU',13,'Zmień rolę użytkownika','ADU');
+insert into app_menu(menuid,pos,caption,parent) values ('CHPU',14,'Zmień hasło użytkownika','ADU');
 
 insert into app_menu(menuid,pos,caption,parent) values ('SEKR',20,'Sekretariat','MAIN');
 insert into app_menu(menuid,pos,caption,parent) values ('STUDENTS',20,'Administracja uczniami','SEKR');
@@ -449,10 +450,8 @@ insert into app_menu(menuid,pos,caption,parent) values ('TEACHERS',21,'Administr
 
 
 -- dodanie uprawnień do menu
-insert app_menu_role(roleid,menuid) values('none','EXIT');
 insert app_menu_role(roleid,menuid) values('none','GETTIME');
 insert app_menu_role(roleid,menuid) values('none','LOGIN');
-insert app_menu_role(roleid,menuid) values('admin','EXIT');
 insert app_menu_role(roleid,menuid) values('admin','LOGOUT');
 insert app_menu_role(roleid,menuid) values('admin','GETTIME');
 insert app_menu_role(roleid,menuid) values('admin','SEKR');
@@ -460,17 +459,16 @@ insert app_menu_role(roleid,menuid) values('admin','STUDENTS');
 insert app_menu_role(roleid,menuid) values('admin','TEACHERS');
 insert app_menu_role(roleid,menuid) values('admin','APPROLES');
 
-insert app_menu_role(roleid,menuid) values('simple','EXIT');
 insert app_menu_role(roleid,menuid) values('simple','LOGOUT');
 insert app_menu_role(roleid,menuid) values('simple','GETTIME');
 
 insert app_menu_role(roleid,menuid) value('admin','ADU');
 insert app_menu_role(roleid,menuid) value('admin','ACU');
--- insert app_menu_role(roleid,menuid) value('admin','ACR');
 insert app_menu_role(roleid,menuid) value('admin','DIU');
-insert app_menu_role(roleid,menuid) value('admin','CHP');
+insert app_menu_role(roleid,menuid) value('admin','EIU');
+insert app_menu_role(roleid,menuid) value('admin','CHPU');
+insert app_menu_role(roleid,menuid) value('admin','CHRU');
 
-delete from app_menu_role where menuid='EXIT';
-delete from app_menu where menuid='EXIT';
+
 
 commit;

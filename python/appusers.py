@@ -27,8 +27,14 @@ class AppUsers(Menu):
                 self.print_userlist(ex)
             elif kw=='ACU':
                 self.add_user(ex)
-            elif kw=='CHP':
+            elif kw=='CHRU':
                 self.user_change_role(ex) 
+            elif kw=='CHPU':
+                self.user_change_password(ex)             
+            elif kw=='DIU':
+                self.enable_disable_user(ex,0)
+            elif kw=='EIU':
+                self.enable_disable_user(ex,1)            
             elif kw=='APPROLES':
                 r=Role(self.a, self.user) 
                 r.loadmenu()
@@ -43,7 +49,7 @@ class AppUsers(Menu):
         print('       uwaga: nazwa, logi, email, password nie mogą zawierać spacji !')
         print('CHP [login [new_role_ID]]')
     
-    def user_change_role(self,ex):
+    def select_user(self,ex):
         if len(ex)<2:
             self.read_userlist('(1,0)')
             print('Dostępne loginy:')
@@ -56,7 +62,35 @@ class AppUsers(Menu):
             return
         self.read_oneuser(w)
         print(self)
+        return w
         
+    def user_change_password(self,ex):
+        w=self.select_user(ex)
+        if len(ex)<3:
+            passwdtmp =input('Podaj nowe hasło [Enter] - przerywa:')
+            if passwdtmp=="":
+                return
+        else:
+            passwdtmp=ex[2]        
+        passwd=hashlib.md5(str(passwdtmp).encode("utf-8")).hexdigest()
+        print('Zmiana hasła...', end='')
+        self.a.execute(appusers.userchpasswd%(passwd,w))                
+        
+    def enable_disable_user(self,ex,ei):
+        w=self.select_user(ex)
+        if w==self.user.userlogin:
+            print('Nie możesz zablokować ani odblokować sam siebie!')
+            return
+        if ei==0:
+            print('Blokuję użytkownika...',end='')
+            #print (appusers.userdisable%(0,w))
+            self.a.execute(appusers.userdisable%(0,w))        
+        else:
+            print('Odblokowuję użytkownika...',end='')
+            self.a.execute(appusers.userdisable%(1,w))        
+            
+    def user_change_role(self,ex):
+        w=self.select_user(ex)        
         r=Role(self.a, self.user)
         if len(ex)<3:
             print ('Lista dostępnych ról:')
