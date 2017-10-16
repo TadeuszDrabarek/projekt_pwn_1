@@ -109,3 +109,24 @@ def addrole(roleid, rolename):
     insert into app_role(roleid, rolename) 
     values('%s','%s');
     """%(roleid, rolename)
+
+# Długości
+
+def loadlng():
+    return "select id_dlugosci, dlugosc, dlg from t_dlugosci"
+
+def checklngid(s):
+    return "select id_dlugosci, dlugosc, dlg from t_dlugosci where id_dlugosci=%i;"%(s)
+
+def updatelng(id_dlugosci,dlugosc,dlg):
+    return """
+    update t_dlugosci 
+        set dlugosc='%s', dlg=%i
+        where id_dlugosci=%i;
+    """%(dlugosc, dlg, id_dlugosci)
+
+def addlng(dlugosc,dlg):
+    return """
+    insert into t_dlugosci(dlg, dlugosc) 
+    values(%i,'%s');
+    """%(dlg, dlugosc)

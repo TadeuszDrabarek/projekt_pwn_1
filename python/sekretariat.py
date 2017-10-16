@@ -3,6 +3,7 @@ from dbconnection import dbconn
 from dbmapper import sekretariat
 from uczniowie import Uczniowie
 from nauczyciele import Nauczyciele
+from dlugosci import Dlugosci
 import pymysql
 import hashlib
 from menu import Menu
@@ -22,6 +23,8 @@ class Sekretariat(Menu):
             elif kw=='TEACHERS':        #Administracja nauczycielami
                 n=Nauczyciele(self.a, self.user)               
                 del n
+            elif kw=='LNG':
+                d=Dlugosci(self.a, self.user)
         return kw
     
     def menuhelp(self):
