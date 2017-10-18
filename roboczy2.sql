@@ -136,3 +136,97 @@ select * from t_uczniowie where id_ucznia=2;
 
 
 update t_uczniowie set imie='Brandon1', nazwisko='Acri1', adres='Adres1' where id_ucznia=2;
+
+select * from app_users;
+#e19d5cd5af0378da05f63f891c7467af
+#e19d5cd5af0378da05f63f891c7467af
+#e19d5cd5af0378da05f63f891c7467af
+
+select * from app_role;
+delete from app_role where roleid='75 minut';
+
+delete from app_menu where menuid='SEM';
+
+select * from t_semestry ;
+
+delete from t_semestry where id_semestru=3;
+
+select g.id_grupy,g.nazwa,t.nazwa from t_grupy g
+inner join t_semestry t on t.id_semestru=g.id_semestru;
+
+select * from t_grupy;
+
+select * from v_ile_uczniow_w_grupie;
+
+select uig.id_ucznia,concat(u.imie,' ',u.nazwisko) as imie_nazwisko, uig.id_grupy, g.nazwa,uig.data_od, uig.data_do 
+from t_uczniowe_w_grupie uig
+inner join t_uczniowie u on u.id_ucznia=uig.id_ucznia
+inner join t_grupy g on g.id_grupy=uig.id_grupy
+where uig.id_grupy=5
+
+
+;
+
+select uig.id_ucznia,concat(u.imie,' ',u.nazwisko) as imie_nazwisko, uig.id_grupy, g.nazwa,uig.data_od, uig.data_do 
+    from t_uczniowe_w_grupie uig
+    inner join t_uczniowie u on u.id_ucznia=uig.id_ucznia
+    inner join t_grupy g on g.id_grupy=uig.id_grupy
+    where uig.id_grupy=15
+    and u.imie like '%a%'
+    order by u.nazwisko,u.imie,uig.id_ucznia;
+    
+select * from t_uczniowe_w_grupie where id_grupy=15;    
+
+update t_uczniowe_w_grupie set data_do=curdate()-1
+    where id_grupy=15 and id_ucznia=100;
+
+
+insert into t_uczniowe_w_grupie(id_ucznia,id_grupy,data_od,data_do)
+values(101,15,curdate(),null);
+
+insert into t_uczniowe_w_grupie(id_ucznia,id_grupy,data_od,data_do)
+values(100,15,if(''='',curdate(),''),if(''='',null,''));
+
+insert into t_uczniowe_w_grupie(id_ucznia,id_grupy,data_od,data_do) 
+values(99,8,'2017-09-01','2018-01-31');
+
+
+
+
+select max(data_zajec) from t_zajecia;
+
+select * from t_zajecia order by data_zajec;
+
+-- zapytanie zwraca listę uczniów jacy powinni być na zajęciach o zadanym ID
+select t.id_zajecia,ug.id_ucznia
+from t_zajecia t
+inner join t_plany p on p.id_planu=t.id_planu
+inner join t_uczniowe_w_grupie ug on ug.id_grupy=p.id_grupy
+where 
+	id_zajecia=67;
+	
+-- zapytanie zwraca listę zajęć z dzisiejszego dnia
+select * from t_zajecia where data_zajec=curdate()+1 or data_odrabiania=curdate();
+
+select p.id_planu, p.id_nauczyciela,p.godzina_rozp,p.godzina_konc
+	,concat(n.imie,' ',n.nazwisko) as nauczyciel
+    ,g.nazwa
+from  t_dni_robocze dr 
+inner join t_plany p on p.id_dnia=dr.id_dnia
+inner join t_nauczyciele n on n.id_nauczyciela=p.id_nauczyciela
+inner join t_grupy g on g.id_grupy=p.id_grupy
+where dr.id_dnia=dayofweek('2017-10-19')
+	and p.data_od<='2017-10-19' and coalesce(data_do,'2017-10-19')>='2017-10-19'
+order by p.id_nauczyciela,p.godzina_rozp;
+
+select count(*) from v_dates where gen_date='2017-10-19';
+
+
+select z.id_zajecia, p.id_nauczyciela, p.godzina_rozp, p.godzina_konc
+	,concat(n.imie,' ',n.nazwisko) as nauczyciel
+	,z.*
+    ,p.*
+from t_zajecia z
+inner join t_plany p on p.id_planu=z.id_planu
+inner join t_nauczyciele n on n.id_nauczyciela=z.id_nauczyciela
+where z.data_zajec='2017-10-19'

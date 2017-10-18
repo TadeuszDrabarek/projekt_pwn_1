@@ -4,10 +4,10 @@ import pymysql
 import hashlib
 from menu import Menu
 
-class Uczniowie(Menu):
+class Semestry(Menu):
     
     def __init__(self,db,u):
-        super().__init__(db,u,True,'STUDENTS')
+        super().__init__(db,u,True,'SEM')
         #self.loaddata()
         #self.loadmenu()
         #self.showmenu()
@@ -23,13 +23,13 @@ class Uczniowie(Menu):
     def doit(self,lw,ex):
         kw=super().doit(lw,ex,False)
         if kw!='EXIT':
-            if kw=='LIST':          #wypisz listę uczniów
+            if kw=='LIST':          #wypisz listę 
                 self.loaddata()
                 print(self)
-            elif kw=='ADD':         #dodaj ucznia
+            elif kw=='ADD':         #dodaj 
                 self.add(ex)
                 ''
-            elif kw=='DEL':         #usuń ucznia
+            elif kw=='DEL':         #usuń 
                 #self.user_change_role(ex)                
                 ''
             elif kw=='EDIT':         #modyfikuj
@@ -41,19 +41,19 @@ class Uczniowie(Menu):
         super().menuhelp()
     
     def loaddata(self):
-        self.a.select(sqlmapper.loadstudents())     
+        self.a.select(sqlmapper.loadsem())     
         
     def add(self,ex):
-        print('Uzupełnij dane ucznia (jeżel nie podasz którejś wartości - nie dodasz ucznia):')
+        print('Uzupełnij dane (jeżel nie podasz którejś wartości - nie dodasz długości :')
         i=1
         wybor=''
         while (i<=3):
             if i==1:
-                pytanie='Podaj nowe imię :'
+                pytanie='Podaj Nazwę :'
             elif i==2:
-                pytanie='Podaj nowe nazwisko :'
-            else:
-                pytanie='Podaj nowy adres :'
+                pytanie='Podaj datę od :'
+            elif i==3:
+                pytanie='Podaj datę do :'
             while (True):
                 #print(i)
                 wejscie=input(pytanie)
@@ -67,11 +67,11 @@ class Uczniowie(Menu):
                 else:
                     #print ('wejscie<>""')
                     if i==1:
-                        imie=wejscie
+                        nazwa=wejscie
                     elif i==2:
-                        nazwisko=wejscie
-                    else:
-                        adres=wejscie
+                        data_od=wejscie
+                    elif i==3:
+                        data_do=wejscie
                     #print ('stare i',i)
                     i+=1
                     #print ('nowe i',i)
@@ -79,21 +79,23 @@ class Uczniowie(Menu):
             if wybor=='Q':
                 break
         if wybor!='Q':
-            print('Zapisuję dane...',end='')   
-            if self.a.execute(sqlmapper.addstudent(imie,nazwisko,adres)):
+            print('Zapisuję dane...',end='') 
+            #print(sqlmapper.addlng(dlugosc,dlg));
+            #if False :
+            if self.a.execute(sqlmapper.addsem(data_od, data_do, nazwa)):
                 idu=self.a.get_last_id()
-                self.a.select(sqlmapper.checkstudentid(idu))
+                self.a.select(sqlmapper.checksemid(idu))
                 print('Wprowadzono:')
                 print(self)   
         else:
-            print('Rezygnacja z wprowadzania nowego ucznia')
+            print('Rezygnacja z wprowadzania')
             
     def edit(self,ex):
         idus=""
         if len(ex)<2:
             while(True):
                 while(True):
-                    idus=input('Podaj identyfikator ucznia [Enter - rezygnacja]:')
+                    idus=input('Podaj identyfikator semestru [Enter - rezygnacja]:')
                     if idus.isdigit():
                         idu=int(idus)
                         break
@@ -102,7 +104,7 @@ class Uczniowie(Menu):
                     print('Identyfikator musi być liczbowy')
                 if idus=="":
                     break                
-                if self.check_studentid(idu):
+                if self.check_semid(idu):
                     break
                 print('Identyfikator nie istnieje')
         else:
@@ -112,35 +114,36 @@ class Uczniowie(Menu):
             else:
                 print('Identyfikator musi być liczbowy')
                 return
-            if not self.check_studentid(idu):
+            if not self.check_semid(idu):
                 print('Identyfikator nie istnieje')            
                 return
         if idus=="":
             return        
         print(self)
-        imie=input('Podaj nowe imię ([Enter] - pozostawia obecne :')
-        nazwisko=input('Podaj nowe nazwisko ([Enter] - pozostawia obecne :')
-        adres=input('Podaj nowy adres ([Enter] - pozostawia obecny :')
-        if imie=="":
-            imie=self.a.result[0][1]
-        if nazwisko=="":
-            nazwisko=self.a.result[0][2]
-        if adres=="":
-            adres=self.a.result[0][3]
+        nazwa=input('Podaj nową nazwę ([Enter] - pozostawia obecne :')
+        data_od=input('Podaj nową datę od (min)([Enter] - pozostawia obecne :')
+        data_do=input('Podaj nową datę do (min)([Enter] - pozostawia obecne :')
+        
+        if nazwa=="":
+            nazwa=self.a.result[0][1]
+        if data_od=="":
+            data_od=self.a.result[0][2]
+        if data_do=="":
+            data_do=self.a.result[0][3]
         print('Wprowadzam zmianę...', end='')
-        self.a.execute(sqlmapper.updatestudent(idu,imie,nazwisko,adres))
+        self.a.execute(sqlmapper.updatesem(idu,data_od, data_do, nazwa))
         
             
-    def check_studentid(self,idu):
-        self.a.select(sqlmapper.checkstudentid(idu))
+    def check_semid(self,idu):
+        self.a.select(sqlmapper.checksemid(idu))
         return len(self.a.result)>0
             
         
     def __str__(self):
-        s='%8s|%-20s|%-30s|%-40s\n'%('Id','Imię','Nazwisko','Adres')
+        s='%8s|%-20s|%-12s|%-12s\n'%('Id','Nazwa','Data od', 'Data do')
         s+='-'*101+'\n'
         for row in self.a.result:
-            s+='%8i|%-20s|%-30s|%-40s\n'%(row[0],row[1],row[2],row[3])
+            s+='%8i|%-20s|%-12s|%-12s\n'%(row[0],row[1],row[2],row[3])
         return s 
     
     

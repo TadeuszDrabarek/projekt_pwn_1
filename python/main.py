@@ -6,6 +6,7 @@ from dbconnection import sqlmapper
 from db import DB
 from appusers import User, AppUsers
 from sekretariat import Sekretariat
+from lessons import Lessons
 from menu import Menu
 import hashlib
 import time
@@ -54,7 +55,11 @@ class MainMenu(Menu):
             submenu=Sekretariat(self.a, self.user)
             #submenu.loadmenu('SEKR')
             submenu.showmenu()
-            del submenu        
+            del submenu 
+        elif kw=='LESSONS':
+            submenu=Lessons(self.a, self.user)
+            submenu.showmenu()
+            del submenu             
         elif kw=='EXIT':
             if not input('Czy na pewno chcesz wyjść (T/N) ?').upper()=='T':
                 return 'DONT EXIT'

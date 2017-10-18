@@ -148,11 +148,11 @@ group by concat(n.imie,' ',n.nazwisko);
 -- Zapytanie uzupełnia tabelę z zajęciami w zadanym okresie dat 
 #(powinno się uzupełniać w dniu zajęć dla każdych zajęc osobno lub hurtem na cały dzień)
 insert into t_zajecia(data_zajec,id_planu,id_nauczyciela,czy_odbyte,czy_odrabiane)
-select v.gen_date, p.id_planu, p.id_nauczyciela,1,0
+select v.gen_date, p.id_planu, p.id_nauczyciela,0,0
 from v_dates v
 inner join t_dni_robocze dr on dr.id_dnia=dayofweek(v.gen_date)
 inner join t_plany p on p.id_dnia=dayofweek(v.gen_date)
-where v.gen_date between '2017-09-01' and '2017-09-07';
+where v.gen_date between '2017-10-20' and '2017-10-20';
 
 
 -- Zapytanie losowo ustawia obecności na zajęciach uczniów w zadanym okresie
@@ -224,10 +224,95 @@ order by p.id_dnia, p.godzina_rozp
     ;
     
 -- wyświetl frekwencję uczniów w zadanym okresie (na ilu lekcjach był, ile opuścił, frekwencja w %)
-select u.imie, u.nazwisko, sum(o.czy_obecny) obecnosci, sum(1-o.czy_obecny) nieobecnosci
+select u.imselect p.id_planu, p.id_nauczyciela,p.godzina_rozp,p.godzina_konc
+	,concat(n.imie,' ',n.nazwisko) as nauczyciel
+    ,g.nazwa
+from  t_dni_robocze dr 
+inner join t_plany p on p.id_dnia=dr.id_dnia
+inner join t_nauczyciele n on n.id_nauczyciela=p.id_nauczyciela
+inner join t_grupy g on g.id_grupy=p.id_grupy
+where dr.id_dnia=dayofweek('2017-10-19')
+order by p.id_nauczyciela,p.godzina_rozpie, u.nazwisko, sum(o.czy_obecny) obecnosci, sum(1-o.czy_obecny) nieobecnosci
 	, round((sum(o.czy_obecny)/count(o.czy_obecny))*100.00,2) as "frekwencja_%"
 from t_obecnosci o
 inner join t_zajecia z on z.id_zajecia=o.id_zajecia
 inner join t_uczniowie u on u.id_ucznia=o.id_ucznia
 where z.data_zajec between '2017-09-01' and '2017-09-15' 
 group by u.imie, u.nazwisko
+;
+-- wyświetla listę zajęc jakie wg. planu ramowego powinny odbyć się wybranego dnia
+
+create or replace view v_plan_ramowy_dzien as
+select p.id_planu, p.id_nauczyciela,p.godzina_rozp,p.godzina_konc
+	,concat(n.imie,' ',n.nazwisko) as nauczyciel
+    ,g.nazwa
+    ,dr.id_dnia
+    ,v.gen_date
+    ,p.id_semestru
+    ,p.id_grupy
+from  t_dni_robocze dr 
+inner join t_plany p on p.id_dnia=dr.id_dnia
+inner join t_nauczyciele n on n.id_nauczyciela=p.id_nauczyciela
+inner join t_grupy g on g.id_grupy=p.id_grupy
+inner join v_dates v on dr.id_dnia=dayofweek(v.gen_date)
+inner join t_semestry s on s.id_semestru=p.id_semestru and s.data_od<=v.gen_date and coalesce(s.data_do,v.gen_date)>v.gen_date
+#where dr.id_dnia=dayofweek('2017-10-19')
+order by p.id_nauczyciela,p.godzina_rozp;
+
+select * from v_plan_ramowy_dzien where gen_date='2017-10-19';
+
+-- zapytanie wyświetla listę zajęć danego dnia wraz ze szczególami
+create or replace view v_view_plan as
+select z.id_zajecia, p.id_nauczyciela, p.godzina_rozp, p.godzina_konc
+	,concat(n.imie,' ',n.nazwisko) as nauczyciel_real
+    ,concat(n0.imie,' ',n0.nazwisko) as nauczyciel_plan
+    ,g.nazwa
+    ,v.liczba_uczniow
+    ,z.data_zajec
+    ,z.data_odrabiania
+    ,coalesce(z.data_odrabiania,z.data_zajec) as data_zajec_real
+    ,p.id_planu
+    ,p.id_semestru
+    ,p.id_grupy
+from t_zajecia z
+inner join t_plany p on p.id_planu=z.id_planu
+inner join t_nauczyciele n on n.id_nauczyciela=z.id_nauczyciela
+inner join t_nauczyciele n0 on n0.id_nauczyciela=p.id_nauczyciela
+inner join t_grupy g on g.id_grupy=p.id_grupy
+inner join v_ile_uczniow_w_grupie v on v.id_grupy=p.id_grupy;
+
+select * from v_view_plan where data_zajec_real='2017-10-19';
+
+update t_zajecia set data_odrabiania='2017-10-19', czy_odrabiane=1 where id_zajecia=83;
+
+update t_zajecia set data_odrabiania='2017-10-20', czy_odrabiane=1 where id_zajecia=74;
+
+select * from t_zajecia;
+
+select *
+from v_plan_ramowy_dzien vp
+left join v_view_plan vr on vr.id_planu=vp.id_planu and vr.data_zajec_real=vp.gen_date
+where vp.gen_date='2017-10-19' or vr.data_zajec_real='2017-10-19'
+;
+select vp.*,vr.*
+from v_plan_ramowy_dzien vp
+left join v_view_plan vr on vr.id_planu=vp.id_planu and vr.data_zajec_real=vp.gen_date
+where vp.gen_date='2017-10-19' 
+union
+select vp.*,vr.*
+from v_view_plan vr 
+left join v_plan_ramowy_dzien vp on vr.id_planu=vp.id_planu and vr.data_zajec_real=vp.gen_date
+where vr.data_zajec_real='2017-10-19';
+
+-- zapytanie zwraca szczegóły lekcji z dnia dzisiejszego
+select id_zajecia,id_nauczyciela,godzina_rozp,godzina_konc,nauczyciel_real,vr.nazwa
+, case when nauczyciel_plan<>nauczyciel_real then 'TAK' else 'NIE' end as zastepstwo
+, case when data_odrabiania='2017-10-19' then 'Przesunięta na dziś' 
+       when data_odrabiania is not null then 'Przesunięte z dziś' 
+       else 'W terminie' end as status 
+, case when data_zajec='2017-10-19' and data_zajec<>data_zajec_real then vr.data_zajec_real  
+       when data_zajec_real='2017-10-19' and data_zajec<>data_zajec_real then data_zajec 
+       else '' end as przeniesione_z_na
+ from v_view_plan vr 
+where vr.data_zajec_real='2017-10-19' or vr.data_zajec='2017-10-19'
+order by godzina_rozp;

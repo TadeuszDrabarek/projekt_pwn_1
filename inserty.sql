@@ -437,6 +437,7 @@ insert into app_menu(menuid,pos,caption,parent) values ('LOGOUT',997,'Wyloguj','
 insert into app_menu(menuid,pos,caption,parent) values ('LOGIN',996,'Zaloguj','MAIN');
 
 insert into app_menu(menuid,pos,caption,parent) values ('ADU',995,'Administracja użytkownikami','MAIN');
+insert into app_menu(menuid,pos,caption,parent) values ('LESSONS',100,'Administracja użytkownikami','MAIN');
 insert into app_menu(menuid,pos,caption,parent) values ('ACU',10,'Utwórz użytkownika','ADU');
 insert into app_menu(menuid,pos,caption,parent) values ('APPROLES',11,'Administracja rolami aplikacji','ADU');
 insert into app_menu(menuid,pos,caption,parent) values ('DIU',12,'Zablokuj użytkownika','ADU');
@@ -447,6 +448,10 @@ insert into app_menu(menuid,pos,caption,parent) values ('CHPU',14,'Zmień hasło
 insert into app_menu(menuid,pos,caption,parent) values ('SEKR',20,'Sekretariat','MAIN');
 insert into app_menu(menuid,pos,caption,parent) values ('STUDENTS',20,'Administracja uczniami','SEKR');
 insert into app_menu(menuid,pos,caption,parent) values ('TEACHERS',21,'Administracja nauczycielami','SEKR');
+insert into app_menu(menuid,pos,caption,parent) values ('LNG',22,'Administracja długościami','SEKR');
+insert into app_menu(menuid,pos,caption,parent) values ('SEM',23,'Administracja semestrami','SEKR');
+insert into app_menu(menuid,pos,caption,parent) values ('GROUPS',24,'Administracja grupami','SEKR');
+insert into app_menu(menuid,pos,caption,parent) values ('UWG',25,'Przypisanie uczniów do grup','SEKR');
 
 
 -- dodanie uprawnień do menu
@@ -458,6 +463,11 @@ insert app_menu_role(roleid,menuid) values('admin','SEKR');
 insert app_menu_role(roleid,menuid) values('admin','STUDENTS');
 insert app_menu_role(roleid,menuid) values('admin','TEACHERS');
 insert app_menu_role(roleid,menuid) values('admin','APPROLES');
+insert app_menu_role(roleid,menuid) values('admin','LNG');
+insert app_menu_role(roleid,menuid) values('admin','SEM');
+insert app_menu_role(roleid,menuid) values('admin','GROUPS');
+insert app_menu_role(roleid,menuid) values('admin','UWG');
+insert app_menu_role(roleid,menuid) values('admin','LESSONS');
 
 insert app_menu_role(roleid,menuid) values('simple','LOGOUT');
 insert app_menu_role(roleid,menuid) values('simple','GETTIME');

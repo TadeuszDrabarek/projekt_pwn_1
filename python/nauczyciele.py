@@ -9,8 +9,8 @@ class Nauczyciele(Menu):
     def __init__(self,db,u):
         super().__init__(db,u,True,'TEACHERS')
         #self.loaddata()
-        self.loadmenu()
-        self.showmenu()
+        #self.loadmenu()
+        #self.showmenu()
         self.cls=False
         #self.=db
     def loadmenu(self):

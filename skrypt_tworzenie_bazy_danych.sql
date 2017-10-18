@@ -232,7 +232,6 @@ select id_grupy,count(*) as liczba_uczniow from t_uczniowe_w_grupie
 where data_od<=curdate() and coalesce(data_do,curdate())>=curdate()
 group by id_grupy;
 
-
 -- Widok generujący daty z zadanego przedziału
 create or replace view v_dates as 
 select gen_date from 
@@ -324,3 +323,18 @@ create table app_menu_role(
     roleid varchar(10),
     primary key (menuid,roleid)
 );
+
+-- tabela z ramowym planem zajęć na dany dzień
+create or replace view v_plan_ramowy_dzien as
+select p.id_planu, p.id_nauczyciela,p.godzina_rozp,p.godzina_konc
+	,concat(n.imie,' ',n.nazwisko) as nauczyciel
+    ,g.nazwa
+    ,dr.id_dnia
+    ,v.gen_date
+from  t_dni_robocze dr 
+inner join t_plany p on p.id_dnia=dr.id_dnia
+inner join t_nauczyciele n on n.id_nauczyciela=p.id_nauczyciela
+inner join t_grupy g on g.id_grupy=p.id_grupy
+inner join v_dates v on dr.id_dnia=dayofweek(v.gen_date)
+inner join t_semestry s on s.id_semestru=p.id_semestru and s.data_od<=v.gen_date and coalesce(s.data_do,v.gen_date)>v.gen_date
+order by p.id_nauczyciela,p.godzina_rozp;
