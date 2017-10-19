@@ -44,7 +44,7 @@ class MainMenu(Menu):
             self.loadmenu()
             os.system("cls")
             print('Wylogowanie!')
-        elif kw=='GETTIME':
+        elif kw=='NOW':
             self.print_now()
         elif kw=='ADU':
             submenu=AppUsers(self.a, self.user)

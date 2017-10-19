@@ -53,7 +53,7 @@ class Sekretariat(Menu):
                 #ga.loadmenu()
                 #print('C')
                 ga.showmenu()
-                del g            
+                del ga         
         return kw
     
     def menuhelp(self):

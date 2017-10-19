@@ -432,12 +432,12 @@ insert into app_users(login,email,pass,datcre,username,roleid)
  
  -- dodanie opcji do menu
 insert into app_menu(menuid,pos,caption) values ('MAIN',0,'Menu główne');
-insert into app_menu(menuid,pos,caption,parent) values ('GETTIME',998,'Podaj czas','MAIN');
+insert into app_menu(menuid,pos,caption,parent) values ('NOW',998,'Podaj czas','MAIN');
 insert into app_menu(menuid,pos,caption,parent) values ('LOGOUT',997,'Wyloguj','MAIN');
 insert into app_menu(menuid,pos,caption,parent) values ('LOGIN',996,'Zaloguj','MAIN');
 
 insert into app_menu(menuid,pos,caption,parent) values ('ADU',995,'Administracja użytkownikami','MAIN');
-insert into app_menu(menuid,pos,caption,parent) values ('LESSONS',100,'Administracja użytkownikami','MAIN');
+insert into app_menu(menuid,pos,caption,parent) values ('LESSONS',100,'Operacje na zajęciach','MAIN');
 insert into app_menu(menuid,pos,caption,parent) values ('ACU',10,'Utwórz użytkownika','ADU');
 insert into app_menu(menuid,pos,caption,parent) values ('APPROLES',11,'Administracja rolami aplikacji','ADU');
 insert into app_menu(menuid,pos,caption,parent) values ('DIU',12,'Zablokuj użytkownika','ADU');
@@ -455,10 +455,10 @@ insert into app_menu(menuid,pos,caption,parent) values ('UWG',25,'Przypisanie uc
 
 
 -- dodanie uprawnień do menu
-insert app_menu_role(roleid,menuid) values('none','GETTIME');
+insert app_menu_role(roleid,menuid) values('none','NOW');
 insert app_menu_role(roleid,menuid) values('none','LOGIN');
 insert app_menu_role(roleid,menuid) values('admin','LOGOUT');
-insert app_menu_role(roleid,menuid) values('admin','GETTIME');
+insert app_menu_role(roleid,menuid) values('admin','NOW');
 insert app_menu_role(roleid,menuid) values('admin','SEKR');
 insert app_menu_role(roleid,menuid) values('admin','STUDENTS');
 insert app_menu_role(roleid,menuid) values('admin','TEACHERS');
@@ -470,7 +470,7 @@ insert app_menu_role(roleid,menuid) values('admin','UWG');
 insert app_menu_role(roleid,menuid) values('admin','LESSONS');
 
 insert app_menu_role(roleid,menuid) values('simple','LOGOUT');
-insert app_menu_role(roleid,menuid) values('simple','GETTIME');
+insert app_menu_role(roleid,menuid) values('simple','NOW');
 
 insert app_menu_role(roleid,menuid) value('admin','ADU');
 insert app_menu_role(roleid,menuid) value('admin','ACU');

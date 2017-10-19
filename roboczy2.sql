@@ -223,10 +223,31 @@ select count(*) from v_dates where gen_date='2017-10-19';
 
 
 select z.id_zajecia, p.id_nauczyciela, p.godzina_rozp, p.godzina_konc
-	,concat(n.imie,' ',n.nazwisko) as nauczyciel
-	,z.*
-    ,p.*
+	,concat(n.imie,' ',n.nazwisko) as nauczyciel_real
+    ,concat(n0.imie,' ',n0.nazwisko) as nauczyciel_plan
+    ,g.nazwa
+    ,v.liczba_uczniow
 from t_zajecia z
 inner join t_plany p on p.id_planu=z.id_planu
 inner join t_nauczyciele n on n.id_nauczyciela=z.id_nauczyciela
-where z.data_zajec='2017-10-19'
+inner join t_nauczyciele n0 on n0.id_nauczyciela=p.id_nauczyciela
+inner join t_grupy g on g.id_grupy=p.id_grupy
+inner join v_ile_uczniow_w_grupie v on v.id_grupy=p.id_grupy
+where z.data_zajec='2017-10-19';
+
+
+select * from t_zajecia where id_zajecia=67;
+
+select z.data_zajec,z.data_odrabiania,z.czy_odbyte,z.czy_odrabiane,z.id_nauczyciela nauczyciel_real,
+	concat(n1.imie,' ',n1.nazwisko) imie_nazwisko_nau_real
+	p.id_nauczyciela nauczyciel_plan, 
+    concat(n0.imie,' ',n0.nazwisko) imie_nazwisko_nau_plan
+    p.godzina_rozp, p.id_dlugosci,d.dlugosc,p.godzina_konc,
+    v.liczba_uczniow
+from t_zajecia z
+inner join t_plany p on p.id_planu=z.id_planu
+inner join v_ile_uczniow_w_grupie v on v.id_grupy=p.id_grupy
+inner join t_dlugosci d on d.id_dlugosci=p.id_dlugosci
+inner join t_nauczyciele n0 on n0.id_nauczyciela=p.id_nauczyciela
+inner join t_nauczyciele n1 on n1.id_nauczyciela=z.id_nauczyciela
+where z.id_zajecia=67

@@ -150,16 +150,17 @@ alter table t_zajecia add constraint unique(id_planu,data_zajec);
 
 -- Tabela z obecnościami uczniów
 drop table if exists t_obecnosci;
-create table t_obecnosci(
+create table t_obecnosci_test(
 	id_obecnosci	int primary key auto_increment,
     id_zajecia		int,
     id_ucznia		int,
     czy_obecny		int,
     foreign key (id_zajecia) references t_zajecia(id_zajecia),
     foreign key (id_ucznia) references t_uczniowie(id_ucznia),
-    check (czy_obecny in (0, 1))
+    check (czy_obecny in (0, 1, null))
 );
 alter table t_obecnosci add constraint unique(id_zajecia,id_ucznia);
+
 
 -- Tabela z rozliczeniami uczniów
 drop table if exists t_rozliczenia_uczniow;
@@ -324,13 +325,15 @@ create table app_menu_role(
     primary key (menuid,roleid)
 );
 
--- tabela z ramowym planem zajęć na dany dzień
+-- widok z ramowym planem zajęć na dany dzień
 create or replace view v_plan_ramowy_dzien as
 select p.id_planu, p.id_nauczyciela,p.godzina_rozp,p.godzina_konc
 	,concat(n.imie,' ',n.nazwisko) as nauczyciel
     ,g.nazwa
     ,dr.id_dnia
     ,v.gen_date
+    ,p.id_semestru
+    ,p.id_grupy
 from  t_dni_robocze dr 
 inner join t_plany p on p.id_dnia=dr.id_dnia
 inner join t_nauczyciele n on n.id_nauczyciela=p.id_nauczyciela
@@ -338,3 +341,24 @@ inner join t_grupy g on g.id_grupy=p.id_grupy
 inner join v_dates v on dr.id_dnia=dayofweek(v.gen_date)
 inner join t_semestry s on s.id_semestru=p.id_semestru and s.data_od<=v.gen_date and coalesce(s.data_do,v.gen_date)>v.gen_date
 order by p.id_nauczyciela,p.godzina_rozp;
+
+-- widok wyświetla listę zajęć danego dnia wraz ze szczególami
+create or replace view v_view_plan as
+select z.id_zajecia, p.id_nauczyciela, p.godzina_rozp, p.godzina_konc
+	,concat(n.imie,' ',n.nazwisko) as nauczyciel_real
+    ,concat(n0.imie,' ',n0.nazwisko) as nauczyciel_plan
+    ,g.nazwa
+    ,v.liczba_uczniow
+    ,z.data_zajec
+    ,z.data_odrabiania
+    ,coalesce(z.data_odrabiania,z.data_zajec) as data_zajec_real
+    ,p.id_planu
+    ,p.id_semestru
+    ,p.id_grupy
+    , z.czy_odbyte,z.czy_odrabiane
+from t_zajecia z
+inner join t_plany p on p.id_planu=z.id_planu
+inner join t_nauczyciele n on n.id_nauczyciela=z.id_nauczyciela
+inner join t_nauczyciele n0 on n0.id_nauczyciela=p.id_nauczyciela
+inner join t_grupy g on g.id_grupy=p.id_grupy
+inner join v_ile_uczniow_w_grupie v on v.id_grupy=p.id_grupy;

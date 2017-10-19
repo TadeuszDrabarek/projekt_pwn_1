@@ -6,6 +6,17 @@ from menu import Menu
 from semestry import Semestry
 from grupy import Grupy
 from uczniowie import Uczniowie
+from nauczyciele import Nauczyciele
+import time
+
+def isint(i):
+    if i.isdigit():
+        return True
+    if len(i)>1:
+        j=i[1:]
+        if j.isdigit():
+            return True
+    return False
 
 class Lessons(Menu):
     
@@ -28,9 +39,12 @@ class Lessons(Menu):
         self.menu.append({'id':'STATUS', 'caption':'Pokaż status lekcji z dnia', 'hch':0, 'branch':''})
         self.menu.append({'id':'MK', 'caption':'Twórz zajęcia na zadany zakres czasu', 'hch':0, 'branch':''})
         self.menu.append({'id':'MV', 'caption':'Przsuwa zajęcia na inny dzień', 'hch':0, 'branch':''})
-        self.menu.append({'id':'CT', 'caption':'Zmienia nauczyciela prowadzącego', 'hch':0, 'branch':''})
+        self.menu.append({'id':'CT', 'caption':'Zmienia nauczyciela prowadzącego (zastępwsto)', 'hch':0, 'branch':''})
         self.menu.append({'id':'DETAILS', 'caption':'Wyświetl szczegóły zajęć', 'hch':0, 'branch':''})           
+        self.menu.append({'id':'UNDERWAY', 'caption':'Wyświetl listę zajęć w toku', 'hch':0, 'branch':''})           
+        self.menu.append({'id':'RUN', 'caption':'Rozpocznij zajęcia', 'hch':0, 'branch':''})           
         self.menu.append({'id':'EDIT', 'caption':'Wchodzi w tryb ustawiania obecności', 'hch':0, 'branch':''})
+        self.menu.append({'id':'DONE', 'caption':'Zakończ lekcję !', 'hch':0, 'branch':''})
             
     def printmenu(self):
         super().printmenu();
@@ -56,13 +70,175 @@ class Lessons(Menu):
             elif kw=='MV':         # 
                 self.mv(ex)                            
                 ''
-            elif kw=='DELALL':         # 
-                #self.delete_all(ex)                                        
+            elif kw=='CT':         # 
+                self.chu(ex)                                        
                 ''
+            elif kw=='UNDERWAY':
+                self.underway()
+                
+            elif kw=='DETAILS':
+                self.details(ex)
+            
+            elif kw=='RUN':
+                self.run(ex,'RUN')            
+                
+            elif kw=='DONE':
+                self.run(ex,'DONE')                        
+                
+            elif kw=='EDIT':
+                self.run(ex,'EDIT') 
         return kw
     
     def menuhelp(self):
         super().menuhelp()
+        
+    def underway(self):
+        self.printunderway()
+    
+    def run(self,ex,tryb):
+        if len(ex)>1:
+            w=ex[1]
+            if w.isdigit():
+                if not self.checkidzajec(int(w)):
+                    print('Nieprawidłowy identyfikator!')
+                    return
+                if tryb=='RUN':
+                    if not self.check_can_run(int(w)):
+                        print("Te zajęcia już zostały rozpoczęte!")
+                        return   
+                if tryb=="DONE":
+                    if not self.check_can_done(int(w)):
+                        print("Te zajęcia już zostały zakończone!")
+                        return   
+                if tryb=="EDIT":
+                    if not self.check_can_edit(int(w)):
+                        print("Te zajęcia nie zostały jeszcze rozpoczęte!")
+                        return   
+            else:
+                return
+        else:
+            while (True):
+                w=input('Podaj ID zajęć [Enter-rezygnacja]:')
+                if w=='':
+                    return
+                if w.isdigit():
+                    if self.checkidzajec(int(w)):
+                        if tryb=='RUN':
+                            if self.check_can_run(int(w)):
+                                break
+                            else:
+                                print("Te zajęcia już zostały rozpoczęte!")
+                        if tryb=='DONE':
+                            if self.check_can_done(int(w)):
+                                break
+                            else:
+                                print("Te zajęcia już zostały zakończone!")
+                        if tryb=='EDIT':
+                            if self.check_can_edit(int(w)):
+                                break
+                            else:
+                                print("Te zajęcia nie zostały jeszcze rozpoczęte!")
+                    else:
+                        print("Nie ma takiego identyfikatora!")
+                else:
+                    print("Identyfikator musi być cyfrowy!")
+        print ('Uruchamiam procedurę na bazie danych ...',end='')
+        if tryb=='RUN':
+            self.a.execute(sqlmapper.runlesson(int(w)))
+        if tryb=="DONE":
+            self.a.execute(sqlmapper.donelesson(int(w)))
+        if tryb=="EDIT":
+            #tu nowe menu 
+            # 
+            ''
+        
+    def details(self,ex):
+        if len(ex)>1:
+            w=ex[1]
+            if w.isdigit():
+                if not self.checkidzajec(int(w)):
+                    print('Nieprawidłowy identyfikator!')
+                    return
+            else:
+                return
+        else:
+            while (True):
+                w=input('Podaj ID zajęć [Enter-rezygnacja]:')
+                if w=='':
+                    return
+                if w.isdigit():
+                    if self.checkidzajec(int(w)):
+                        break
+                    else:
+                        print("Nie ma takiego identyfikatora!")
+                else:
+                    print("Identyfikator musi być cyfrowy!")
+        if self.a.select(sqlmapper.lesson_details(int(w))):
+            if self.printdetails():
+                if self.a.select(sqlmapper.lesson_studentslist(int(w))):
+                    self.printstudents()
+                else:
+                    print('Błąd odczytu danych !')    
+            else:
+                if self.a.select(sqlmapper.lesson_studentslist2(int(w))):
+                    self.printstudents2()
+                else:
+                    print('Błąd odczytu danych !')                        
+        else:
+            print('Błąd odczytu danych !')       
+            
+        
+    def printdetails(self):
+        print('Szczegóły zajęć :')
+        print('--------------------------------------------------------------')
+        row=self.a.result[0]
+        print('Grupa                      :',row[13])
+        print('Planowa data zajęć         :',row[0])
+        print('Rzeczywista data zajęć     :',row[1])
+        print('Czy zajęcia się odbyły?    :','TAK' if row[2]==1 else 'NIE')
+        print('Czy zajęcia były odrabiane :','TAK' if row[3]==1 else 'NIE')
+        print('Nauczyciel planowy         :',row[5])
+        print('Nauczyciel rzeczywsty      :',row[7])
+        print('Godziny zajęć              :',row[8],'-',row[10],row[11])
+        print('Liczba uczniów             :',row[12])
+        print('--------------------------------------------------------------')
+        return True if row[2]=='1' else False
+    
+    def printstudents(self):
+        print('Lista uczniów :')
+        for i,row in enumerate(self.a.result):
+            print('%3i. %s'%(i,row[2]))
+            
+    def printstudents2(self):
+        print('Lista uczniów :')
+        for i,row in enumerate(self.a.result):
+            print('%3i. %-30s %s'%(i,row[2], row[3]))
+            
+    def chu(self,ex):
+        while (True):
+            w=input('Podaj ID zajęć [Enter-rezygnacja]:')
+            if w=='':
+                return
+            if w.isdigit():
+                if self.checkidzajec(int(w)):
+                    break
+                else:
+                    print("Nie ma takiego identyfikatora!")
+            else:
+                print("Identyfikator musi być cyfrowy        !")
+        while (True):
+            print('Nauczyciele:')
+            n=Nauczyciele(self.a, self.user)               
+            n.loaddata()            
+            print(n)
+            nid=input('Podaj ID nowego nauczyciela :')
+            if nid.isdigit():
+                if n.check_teacherid(int(nid)):
+                    break
+            print('Nieprawidłowy identyfikator nauczyciela!')
+        print('Aktualizacja danych ...', end='')
+        self.a.execute(sqlmapper.lessonchangeteacher(int(w),int(nid)));
+                            
         
     def mv(self,ex):
         while (True):
@@ -89,19 +265,54 @@ class Lessons(Menu):
         
         self.a.execute(sqlmapper.zmienterminzajec(int(w),w1))  
         
+    def checknotrunned(self,idz):
+        self.a.select(sqlmapper.checknotrunned(idz))
+        return len(self.a.result)>0           
+    
+    def check_can_edit(self,idz):
+        self.a.select(sqlmapper.check_can_edit(idz))
+        return len(self.a.result)>0 
+    
+    def check_can_run(self,idz):
+        self.a.select(sqlmapper.check_can_run(idz))
+        return len(self.a.result)>0 
+    
+    def check_can_done(self,idz):
+        self.a.select(sqlmapper.check_can_done(idz))
+        return len(self.a.result)>0     
+    
     def checkidzajec(self,idz):
         self.a.select(sqlmapper.checkidzajec(idz))
         return len(self.a.result)>0   
     
     def cl(self,ex,l):
-        while (True):
-            w=input('Podaj datę zajęć [Enter - rezygnacja]:')
-            if w=='':
-                return            
-            self.a.select(sqlmapper.checkdate(w))            
-            if self.a.result[0][0]==1:
-                break
-            print('Nieprawidłowa data spóbuj ponownie.')
+        if len(ex)>1:
+            w1=ex[1]
+            if isint(w1):
+                wi1=int(w1)
+                if abs(wi1)>100:
+                    print('Dopuszczalny zakres to +-100 !')
+                    return
+                d0=time.time()+wi1*24*60*60
+                dat=time.gmtime(d0)
+                w='%4i-%02i-%02i'%(dat.tm_year,dat.tm_mon,dat.tm_mday)
+                self.a.select(sqlmapper.checkdate(w))            
+                if self.a.result[0][0]!=1:
+                    print('Nieprawidłowa data!')                
+                    return
+                print('Wybrana data',w)
+            else:
+                print("Parametr musi być liczbą!")
+                return
+        else:        
+            while (True):
+                w=input('Podaj datę zajęć [Enter - rezygnacja]:')
+                if w=='':
+                    return            
+                self.a.select(sqlmapper.checkdate(w))            
+                if self.a.result[0][0]==1:
+                    break
+                print('Nieprawidłowa data spóbuj ponownie.')
         if l==1:
             self.printppd(w)
         elif l==2:
@@ -114,16 +325,16 @@ class Lessons(Menu):
     
     def status(self,w):
         if self.a.select(sqlmapper.status(w)):
-            print('|%10s|%10s|%30s|%20s|%5s|%20s|%10s|'%('Godzina od','Godzina do','Nauczyciel','Grupa','Zastępstwo','Status','Przeniesienie z/na'))
+            print('|%3s|%10s|%30s|%20s|%5s|%20s|%10s|%s'%('ID','Godzina od','Nauczyciel','Grupa','Zastępstwo','Status','Przeniesienie z/na',''))
             print('-'*105)
             for row in self.a.result:
-                print('|%10s|%10s|%30s|%20s|%5s|%20s|%10s|'%(row[2],row[3],row[4],row[5],row[6],row[7],row[8]))                       
+                print('|%3s|%10s|%30s|%20s|%5s|%20s|%10s|%s'%(row[0],row[2],row[4],row[5],row[6],row[7],row[8],row[9]))                       
         else:
             print('Wystąpił błąd przy odczycie danych!')
     def createz(self,w):
         print('Tworzę plan zajęć na',w,' ...',end='')
         if self.a.execute(sqlmapper.createz(w)):
-            printplan(w)
+            self.printplan(w)
         
     def printppd(self,w):
         if self.a.select(sqlmapper.planowyplannadzien(w)):
@@ -139,11 +350,19 @@ class Lessons(Menu):
             print('|%5s|%10s|%10s|%30s|%30s|%20s|%3s|'%('ID','Godzina od','Godzina do','Nauczyciel planowy','Nauczyciel rzeczywisty','Grupa','Liczebność'))
             print('-'*115)
             for row in self.a.result:
-                print('|%5s|%10s|%10s|%30s|%30s|%20s|%3s|'%(row[0],row[2],row[3],row[4],row[5],row[6],row[7]))                       
+                print('|%5s|%10s|%10s|%30s|%30s|%20s|%3s|'%(row[0],row[2],row[3],row[5],row[4],row[6],row[7]))                       
         else:
             print('Wystąpił błąd przy odczycie danych!')
         
-        
+    def printunderway(self):
+        if self.a.select(sqlmapper.printunderway()):
+            print('|%10s|%5s|%10s|%10s|%30s|%20s|%3s|'%('Data','ID','Godzina od','Godzina do','Lekcję prowadzi','Grupa','Liczebność'))
+            print('-'*125)
+            for row in self.a.result:
+                print('|%10s|%5s|%10s|%10s|%30s|%20s|%3s|'%(row[8],row[0],row[2],row[3],row[4],row[6],row[7]))                       
+        else:
+            print('Wystąpił błąd przy odczycie danych!')
+              
         # odstąd kasowanie
     def delete_all(self,ex):
         print('Lista uczniów w grupie')

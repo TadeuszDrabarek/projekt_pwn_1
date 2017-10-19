@@ -30,7 +30,8 @@ class Menu:
     def printmenu(self):
         print('Menu %s:'%(self.mnuname.upper()))
         for key,value in enumerate(self.menu):
-            print(('%3i-%s(%s) '%(key,value['caption'],value['id']))+('...' if value['hch']>0 else ''), end='')
+            #print(('%3i-%s(%s) '%(key,value['caption'],value['id']))+('...' if value['hch']>0 else ''), end='\n')
+            print(('%3i-%-10s %s '%(key,value['id'],value['caption'])), end='\n')
         print('')  
     
     def doit(self,lw,ex,cls=True):

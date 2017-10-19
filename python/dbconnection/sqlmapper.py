@@ -245,6 +245,17 @@ def plannadzien(w):
     from v_view_plan where data_zajec_real='%s';
     """%(w)
 
+def printunderway():
+    return"""
+    select id_zajecia, id_nauczyciela, godzina_rozp, godzina_konc
+	,nauczyciel_real
+        ,nauczyciel_plan
+        ,nazwa
+        ,liczba_uczniow
+        ,data_zajec_real
+    from v_view_plan where czy_odbyte is null;
+    """    
+
 def createz(w):
     return """
     insert into t_zajecia(data_zajec,id_planu,id_nauczyciela,czy_odbyte,czy_odrabiane)
@@ -265,6 +276,9 @@ select id_zajecia,id_nauczyciela,godzina_rozp,godzina_konc,nauczyciel_real,vr.na
 , case when data_zajec='%s' and data_zajec<>data_zajec_real then vr.data_zajec_real  
        when data_zajec_real='%s' and data_zajec<>data_zajec_real then data_zajec 
        else '' end as przeniesione_z_na
+       , case when vr.czy_odbyte=1 then 'ODBYŁY SIĘ'
+              when vr.czy_odbyte=0 then 'NIE ODBYŁY SIĘ'
+              else 'TRWAJĄ' end as s
  from v_view_plan vr 
 where vr.data_zajec_real='%s' or vr.data_zajec='%s'
 order by godzina_rozp;
@@ -279,3 +293,81 @@ def zmienterminzajec(idz,w):
     return """
     update t_zajecia set data_odrabiania='%s', czy_odrabiane=1 where id_zajecia=%i;
     """%(w,idz)
+
+def lessonchangeteacher(idz,idn):
+    return """
+    update t_zajecia set id_nauczyciela=%i where id_zajecia=%i;
+    """%(idn,idz)
+
+
+def lesson_details(idl):
+    return """
+    select z.data_zajec,z.data_odrabiania,z.czy_odbyte,z.czy_odrabiane,z.id_nauczyciela nauczyciel_real,
+	concat(n1.imie,' ',n1.nazwisko) imie_nazwisko_nau_real,
+	p.id_nauczyciela nauczyciel_plan, 
+    concat(n0.imie,' ',n0.nazwisko) imie_nazwisko_nau_plan,
+    p.godzina_rozp, p.id_dlugosci,d.dlugosc,p.godzina_konc,
+    v.liczba_uczniow, g.nazwa
+    from t_zajecia z
+    inner join t_plany p on p.id_planu=z.id_planu
+    inner join v_ile_uczniow_w_grupie v on v.id_grupy=p.id_grupy
+    inner join t_dlugosci d on d.id_dlugosci=p.id_dlugosci
+    inner join t_nauczyciele n0 on n0.id_nauczyciela=p.id_nauczyciela
+    inner join t_nauczyciele n1 on n1.id_nauczyciela=z.id_nauczyciela
+    inner join t_grupy g on p.id_grupy=g.id_grupy
+    where z.id_zajecia=%i;
+    """%(idl)
+
+def lesson_studentslist(idl):
+    return """
+    select t.id_zajecia,ug.id_ucznia,concat(u.imie,' ',u.nazwisko) as uczen
+    from t_zajecia t
+    inner join t_plany p on p.id_planu=t.id_planu
+    inner join t_uczniowe_w_grupie ug on ug.id_grupy=p.id_grupy
+    inner join t_uczniowie u on u.id_ucznia=ug.id_ucznia
+    where 
+	ug.data_od<=t.data_zajec and coalesce(ug.data_do,t.data_zajec)>=t.data_zajec
+    and t.id_zajecia=%i;
+    """%(idl)
+
+def lesson_studentslist2(idl):
+    return """
+    select t.id_zajecia,ug.id_ucznia,concat(u.imie,' ',u.nazwisko) as uczen
+    ,case when ob.czy_obecny=1 then 'OBECNY' 
+        when ob.czy_obecny=0 then 'NIEOBECNY'
+        else 'nieokreślony' end as obecnosc
+        from t_zajecia t
+        inner join t_plany p on p.id_planu=t.id_planu
+        inner join t_uczniowe_w_grupie ug on ug.id_grupy=p.id_grupy
+        inner join t_uczniowie u on u.id_ucznia=ug.id_ucznia
+        left join t_obecnosci ob on ob.id_zajecia=t.id_zajecia and ob.id_ucznia=ug.id_ucznia
+        where 
+    ug.data_od<=t.data_zajec and coalesce(ug.data_do,t.data_zajec)>=t.data_zajec
+    and t.id_zajecia=%i;
+    """%(idl)
+
+def checknotrunned(idz):
+    return """
+    select * from t_zajecia where id_zajecia=%i and czy_odbyte=0;
+    """%(idz)
+
+def check_can_run(idz):    # tylko status 0
+    return """
+    select * from t_zajecia where id_zajecia=%i and czy_odbyte=0;
+    """%(idz)
+
+def check_can_done(idz):   # tylko status NULL (trwają)
+    return """
+    select * from t_zajecia where id_zajecia=%i and czy_odbyte is null;
+    """%(idz)
+
+def check_can_edit(idz):   # status NULL lub 1 (trwają lub zakończone)
+    return """
+    select * from t_zajecia where id_zajecia=%i and czy_odbyte<>0;
+    """%(idz)
+
+def runlesson(idz):
+    return "call run_lesson(%i);"%(idz)
+
+def donelesson(idz):
+    return "call done_lesson(%i);"%(idz)
