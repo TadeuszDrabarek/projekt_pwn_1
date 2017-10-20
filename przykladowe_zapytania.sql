@@ -209,6 +209,7 @@ order by concat(u.imie,' ',u.nazwisko);
 -- wyświetl plan tygodniowy zajęć dla wskazanego ucznia i cenę za lekcję
 select u.imie, u.nazwisko, dr.nazwa_dnia, p.godzina_rozp, p.godzina_konc, g.nazwa
 	, concat(su.cena_std,' PLN') as cena, concat(su.cena_nieob,' PLN') as cena_nieobecnosc
+    , d.dlugosc
 from t_plany p
 inner join t_uczniowe_w_grupie ug on ug.id_grupy=p.id_grupy
 	and ug.data_od<=curdate() and coalesce(ug.data_do,curdate())>=curdate()
@@ -216,12 +217,13 @@ inner join t_grupy g on g.id_grupy=ug.id_grupy
 inner join t_uczniowie u on u.id_ucznia=ug.id_ucznia
 inner join t_dni_robocze dr on dr.id_dnia=p.id_dnia
 inner join v_ile_uczniow_w_grupie vi on vi.id_grupy=ug.id_grupy
+inner join t_dlugosci d on d.id_dlugosci=p.id_dlugosci
 inner join t_stawki_uczniow su on su.data_od<=curdate() and coalesce(su.data_do,curdate())>=curdate()
+inner join t_semestry sm on sm.id_semestru=p.id_semestru
 	and su.id_dlugosci=p.id_dlugosci and su.liczebnosc_grupy_od<=vi.liczba_uczniow and su.liczebnosc_grupy_do>=vi.liczba_uczniow
 where ug.id_ucznia=41
-	and p.id_semestru=1
-order by p.id_dnia, p.godzina_rozp
-    ;
+	and sm.data_od<curdate() and coalesce(sm.data_do,curdate())>=curdate()
+order by p.id_dnia, p.godzina_rozp;
     
 -- wyświetl frekwencję uczniów w zadanym okresie (na ilu lekcjach był, ile opuścił, frekwencja w %)
 select u.imselect p.id_planu, p.id_nauczyciela,p.godzina_rozp,p.godzina_konc
@@ -281,13 +283,6 @@ inner join t_nauczyciele n0 on n0.id_nauczyciela=p.id_nauczyciela
 inner join t_grupy g on g.id_grupy=p.id_grupy
 inner join v_ile_uczniow_w_grupie v on v.id_grupy=p.id_grupy;
 
-select * from v_view_plan where data_zajec_real='2017-10-19';
-
-update t_zajecia set data_odrabiania='2017-10-19', czy_odrabiane=1 where id_zajecia=83;
-
-update t_zajecia set data_odrabiania='2017-10-20', czy_odrabiane=1 where id_zajecia=74;
-
-select * from t_zajecia;
 
 select *
 from v_plan_ramowy_dzien vp

@@ -7,6 +7,7 @@ from semestry import Semestry
 from grupy import Grupy
 from uczniowie import Uczniowie
 from nauczyciele import Nauczyciele
+from obecnosci import Obecnosci
 import time
 
 def isint(i):
@@ -43,7 +44,7 @@ class Lessons(Menu):
         self.menu.append({'id':'DETAILS', 'caption':'Wyświetl szczegóły zajęć', 'hch':0, 'branch':''})           
         self.menu.append({'id':'UNDERWAY', 'caption':'Wyświetl listę zajęć w toku', 'hch':0, 'branch':''})           
         self.menu.append({'id':'RUN', 'caption':'Rozpocznij zajęcia', 'hch':0, 'branch':''})           
-        self.menu.append({'id':'EDIT', 'caption':'Wchodzi w tryb ustawiania obecności', 'hch':0, 'branch':''})
+        self.menu.append({'id':'EDIT', 'caption':'Tryb ustawiania obecności', 'hch':0, 'branch':''})
         self.menu.append({'id':'DONE', 'caption':'Zakończ lekcję !', 'hch':0, 'branch':''})
             
     def printmenu(self):
@@ -142,15 +143,20 @@ class Lessons(Menu):
                         print("Nie ma takiego identyfikatora!")
                 else:
                     print("Identyfikator musi być cyfrowy!")
-        print ('Uruchamiam procedurę na bazie danych ...',end='')
+        
         if tryb=='RUN':
+            print ('Uruchamiam procedurę na bazie danych ...',end='')
             self.a.execute(sqlmapper.runlesson(int(w)))
         if tryb=="DONE":
+            print ('Uruchamiam procedurę na bazie danych ...',end='')
             self.a.execute(sqlmapper.donelesson(int(w)))
         if tryb=="EDIT":
             #tu nowe menu 
             # 
-            ''
+            o=Obecnosci(self.a, self.user,int(w))
+            o.loadmenu()
+            o.showmenu()                
+            del o
         
     def details(self,ex):
         if len(ex)>1:
@@ -195,14 +201,14 @@ class Lessons(Menu):
         print('Grupa                      :',row[13])
         print('Planowa data zajęć         :',row[0])
         print('Rzeczywista data zajęć     :',row[1])
-        print('Czy zajęcia się odbyły?    :','TAK' if row[2]==1 else 'NIE')
+        print('Czy zajęcia się odbyły?    :','TAK' if row[2]==1 else 'NIE' if row[2]==0 else 'TRWAJĄ')
         print('Czy zajęcia były odrabiane :','TAK' if row[3]==1 else 'NIE')
         print('Nauczyciel planowy         :',row[5])
         print('Nauczyciel rzeczywsty      :',row[7])
         print('Godziny zajęć              :',row[8],'-',row[10],row[11])
         print('Liczba uczniów             :',row[12])
         print('--------------------------------------------------------------')
-        return True if row[2]=='1' else False
+        return True if row[2]!=1 else False
     
     def printstudents(self):
         print('Lista uczniów :')
@@ -212,7 +218,7 @@ class Lessons(Menu):
     def printstudents2(self):
         print('Lista uczniów :')
         for i,row in enumerate(self.a.result):
-            print('%3i. %-30s %s'%(i,row[2], row[3]))
+            print('%3i. %-30s %-15s %8.2f'%(i,row[2], row[3],row[4]))
             
     def chu(self,ex):
         while (True):

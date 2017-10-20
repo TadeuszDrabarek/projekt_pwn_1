@@ -336,11 +336,13 @@ def lesson_studentslist2(idl):
     ,case when ob.czy_obecny=1 then 'OBECNY' 
         when ob.czy_obecny=0 then 'NIEOBECNY'
         else 'nieokreślony' end as obecnosc
+    ,coalesce(ru.kwota_brutto,0) do_zaplaty
         from t_zajecia t
         inner join t_plany p on p.id_planu=t.id_planu
         inner join t_uczniowe_w_grupie ug on ug.id_grupy=p.id_grupy
         inner join t_uczniowie u on u.id_ucznia=ug.id_ucznia
         left join t_obecnosci ob on ob.id_zajecia=t.id_zajecia and ob.id_ucznia=ug.id_ucznia
+        left join t_rozliczenia_uczniow ru on ru.id_zajecia=t.id_zajecia and ru.id_ucznia=u.id_ucznia
         where 
     ug.data_od<=t.data_zajec and coalesce(ug.data_do,t.data_zajec)>=t.data_zajec
     and t.id_zajecia=%i;
@@ -363,7 +365,7 @@ def check_can_done(idz):   # tylko status NULL (trwają)
 
 def check_can_edit(idz):   # status NULL lub 1 (trwają lub zakończone)
     return """
-    select * from t_zajecia where id_zajecia=%i and czy_odbyte<>0;
+    select * from t_zajecia where id_zajecia=%i and czy_odbyte is null;
     """%(idz)
 
 def runlesson(idz):
@@ -371,3 +373,84 @@ def runlesson(idz):
 
 def donelesson(idz):
     return "call done_lesson(%i);"%(idz)
+
+
+def obecnosci(idl):
+    return """
+    select ob.id_obecnosci, concat(u.imie,' ',u.nazwisko) as uczen,
+    case when ob.czy_obecny=1 then 'OBECNY' 
+        when ob.czy_obecny=0 then 'NIEOBECNY'
+        else 'nieokreślony' end as obecnosc
+    , ob.id_zajecia, u.id_ucznia
+    from t_obecnosci ob
+    inner join t_uczniowie u on u.id_ucznia=ob.id_ucznia
+    where ob.id_zajecia=%i order by u.nazwisko,u.imie ;
+    """%(idl)
+
+def checksol(lid,uid):
+    return """
+    select * from t_obecnosci where id_zajecia=%i and id_ucznia=%i;
+    """%(lid,uid)
+
+def setobecnosc(lid,uid,ob):
+    return """
+    update t_obecnosci set czy_obecny=%i where id_zajecia=%i and id_ucznia=%i;
+    """%(ob,lid,uid)
+
+
+def saldouczniow(sort):
+    if sort=='S':
+        return """
+        select v.id_ucznia
+            ,concat(u.imie,' ',u.nazwisko) as uczen
+            ,sum(kwota) as saldo 
+            ,case when sum(kwota)>0 then 'ZADŁUŻENIE'
+                  else                   'NADPŁATA'
+                  end as status_salda
+        from v_saldo_uczniow v
+        inner join t_uczniowie u on u.id_ucznia=v.id_ucznia
+        group by v.id_ucznia
+        having sum(kwota)<>0
+        order by sum(kwota) desc, u.nazwisko, u.imie;
+        """
+    elif sort=='U':
+        return """
+        select v.id_ucznia
+            ,concat(u.imie,' ',u.nazwisko) as uczen
+            ,sum(kwota) as saldo 
+            ,case when sum(kwota)>0 then 'ZADŁUŻENIE'
+                  else                   'NADPŁATA'
+                  end as status_salda
+        from v_saldo_uczniow v
+        inner join t_uczniowie u on u.id_ucznia=v.id_ucznia
+        group by v.id_ucznia
+        having sum(kwota)<>0
+        order by u.nazwisko, u.imie;
+        """
+        
+def rozlucznia(j):
+    return """
+    select id_ucznia, uczen, data_operacji, kwota, tytulem
+    from v_rozliczenie_ucznia  where id_ucznia=%i
+    order by data_operacji;
+    """%(j)
+def planucznia(j):
+    return """
+    select u.imie, u.nazwisko, dr.nazwa_dnia, p.godzina_rozp, p.godzina_konc, g.nazwa
+	, concat(su.cena_std,' PLN') as cena, concat(su.cena_nieob,' PLN') as cena_nieobecnosc
+        , d.dlugosc
+        from t_plany p
+        inner join t_uczniowe_w_grupie ug on ug.id_grupy=p.id_grupy
+                and ug.data_od<=curdate() and coalesce(ug.data_do,curdate())>=curdate()
+        inner join t_grupy g on g.id_grupy=ug.id_grupy
+        inner join t_uczniowie u on u.id_ucznia=ug.id_ucznia
+        inner join t_dni_robocze dr on dr.id_dnia=p.id_dnia
+        inner join v_ile_uczniow_w_grupie vi on vi.id_grupy=ug.id_grupy
+        inner join t_dlugosci d on d.id_dlugosci=p.id_dlugosci
+        inner join t_stawki_uczniow su on su.data_od<=curdate() and coalesce(su.data_do,curdate())>=curdate()
+        inner join t_semestry sm on sm.id_semestru=p.id_semestru
+                and su.id_dlugosci=p.id_dlugosci and su.liczebnosc_grupy_od<=vi.liczba_uczniow and su.liczebnosc_grupy_do>=vi.liczba_uczniow
+        where ug.id_ucznia=%i
+                and sm.data_od<curdate() and coalesce(sm.data_do,curdate())>=curdate()
+        order by p.id_dnia, p.godzina_rozp;
+    """%(j)

@@ -239,15 +239,154 @@ where z.data_zajec='2017-10-19';
 select * from t_zajecia where id_zajecia=67;
 
 select z.data_zajec,z.data_odrabiania,z.czy_odbyte,z.czy_odrabiane,z.id_nauczyciela nauczyciel_real,
-	concat(n1.imie,' ',n1.nazwisko) imie_nazwisko_nau_real
+	concat(n1.imie,' ',n1.nazwisko) imie_nazwisko_nau_real,
 	p.id_nauczyciela nauczyciel_plan, 
-    concat(n0.imie,' ',n0.nazwisko) imie_nazwisko_nau_plan
+    concat(n0.imie,' ',n0.nazwisko) imie_nazwisko_nau_plan,
     p.godzina_rozp, p.id_dlugosci,d.dlugosc,p.godzina_konc,
-    v.liczba_uczniow
+    v.liczba_uczniow, g.nazwa
 from t_zajecia z
 inner join t_plany p on p.id_planu=z.id_planu
 inner join v_ile_uczniow_w_grupie v on v.id_grupy=p.id_grupy
 inner join t_dlugosci d on d.id_dlugosci=p.id_dlugosci
 inner join t_nauczyciele n0 on n0.id_nauczyciela=p.id_nauczyciela
 inner join t_nauczyciele n1 on n1.id_nauczyciela=z.id_nauczyciela
-where z.id_zajecia=67
+inner join t_grupy g on p.id_grupy=g.id_grupy
+where z.id_zajecia=83;
+
+select * from v_grupy_i_uczniowie_w_bs;
+
+select t.id_zajecia,ug.id_ucznia,concat(u.imie,' ',u.nazwisko) as uczen
+	,case when ob.czy_obecny=1 then 'OBECNY' 
+          when ob.czy_obecny=0 then 'NIEOBECNY'
+          else 'nieokreślony' end as obecnosc
+from t_zajecia t
+inner join t_plany p on p.id_planu=t.id_planu
+inner join t_uczniowe_w_grupie ug on ug.id_grupy=p.id_grupy
+inner join t_uczniowie u on u.id_ucznia=ug.id_ucznia
+left join t_obecnosci ob on ob.id_zajecia=t.id_zajecia and ob.id_ucznia=ug.id_ucznia
+where 
+	ug.data_od<=t.data_zajec and coalesce(ug.data_do,t.data_zajec)>=t.data_zajec
+    and t.id_zajecia=83
+;
+
+insert into t_obecnosci(id_zajecia,id_ucznia,czy_obecny) 
+select t.id_zajecia,ug.id_ucznia,null
+from t_zajecia t
+inner join t_plany p on p.id_planu=t.id_planu
+inner join t_uczniowe_w_grupie ug on ug.id_grupy=p.id_grupy
+where 
+	ug.data_od<=t.data_zajec and coalesce(ug.data_do,t.data_zajec)>=t.data_zajec
+    and not exists(select 1 from t_obecnosci ob where ob.id_zajecia=t.id_zajecia and ob.id_ucznia=ug.id_ucznia);
+
+   
+delete from t_obecnosci where id_zajecia=99;
+
+    
+select * from t_obecnosci where id_zajecia=83    ;
+
+select * from t_zajecia where id_zajecia=83;
+
+select * from v_obecnosci_det where id_zajecia=83;
+
+select * from v_view_plan vr where vr.id_zajecia=83;
+
+select * from t_zajecia where czy_odbyte=0;
+
+select * from t_zajecia where id_zajecia=99;
+select * from t_obecnosci where id_zajecia=99;
+
+
+call run_lesson(88);
+
+
+select id_zajecia, id_nauczyciela, godzina_rozp, godzina_konc
+	,nauczyciel_real
+        ,nauczyciel_plan
+        ,nazwa
+        ,liczba_uczniow
+        ,data_zajec_real
+    from v_view_plan where czy_odbyte is null;
+
+select * from t_obecnosci where id_zajecia=100;
+
+update t_obecnosci set czy_obecny=0 where czy_obecny is null and id_zajecia=100;
+
+select * from t_rozliczenia_uczniow where id_zajecia=103;
+
+select t.id_zajecia,ug.id_ucznia,concat(u.imie,' ',u.nazwisko) as uczen
+    ,case when ob.czy_obecny=1 then 'OBECNY' 
+        when ob.czy_obecny=0 then 'NIEOBECNY'
+        else 'nieokreślony' end as obecnosc
+	,coalesce(ru.kwota_brutto,0) do_zaplaty
+        from t_zajecia t
+        inner join t_plany p on p.id_planu=t.id_planu
+        inner join t_uczniowe_w_grupie ug on ug.id_grupy=p.id_grupy
+        inner join t_uczniowie u on u.id_ucznia=ug.id_ucznia
+        left join t_obecnosci ob on ob.id_zajecia=t.id_zajecia and ob.id_ucznia=ug.id_ucznia
+        left join t_rozliczenia_uczniow ru on ru.id_zajecia=t.id_zajecia and ru.id_ucznia=u.id_ucznia
+        where 
+    ug.data_od<=t.data_zajec and coalesce(ug.data_do,t.data_zajec)>=t.data_zajec
+    and t.id_zajecia=103;
+    
+    
+select * from t_zajecia order by id_zajecia;    
+
+update t_zajecia set czy_odbyte=0 where id_zajecia>64 and data_zajec<'2017-10-23' and czy_odbyte=1;
+
+delete from t_obecnosci where id_zajecia in (select id_zajecia from t_zajecia where id_zajecia>64 and data_zajec<'2017-10-23' and czy_odbyte=0);
+
+commit;
+
+select v.id_ucznia
+	,concat(u.imie,' ',u.nazwisko) as uczen
+	,sum(kwota) as saldo 
+    ,case when sum(kwota)>0 then 'ZADŁUŻENIE'
+          else                   'NADPŁATA'
+          end as status_salda
+from v_saldo_uczniow v
+inner join t_uczniowie u on u.id_ucznia=v.id_ucznia
+group by v.id_ucznia
+having sum(kwota)<>0
+order by sum(kwota) desc, uczen asc;
+
+select * from t_uczniowie;
+
+create or replace view v_rozliczenie_ucznia as
+select v.id_ucznia
+	,concat(u.imie,' ',u.nazwisko) as uczen
+    ,v.data_operacji, v.kwota
+    ,v.typ_operacji, v.id_operacji
+    ,case when v.typ_operacji='WPL' then 'WPŁATA'
+          when v.typ_operacji='NAL' then 
+            concat('ZAJĘCIA ',coalesce(z.data_odrabiania,z.data_zajec),' (',dn.nazwa_dnia,') g.',p.godzina_rozp,' ',g.nazwa)
+		  else  'unknown' end as tytulem
+from v_saldo_uczniow v
+inner join t_uczniowie u on u.id_ucznia=v.id_ucznia
+left join t_rozliczenia_uczniow ru on ru.id_rozliczenia=v.id_operacji
+left join t_zajecia z on z.id_zajecia=ru.id_zajecia
+left join t_plany p on p.id_planu=z.id_planu
+left join t_grupy g on g.id_grupy=p.id_grupy
+left join t_dni_robocze dn on dn.id_dnia=p.id_dnia;
+
+select id_ucznia, uczen, data_operacji, kwota, tytulem from v_rozliczenie_ucznia  where id_ucznia=96;
+
+select v.id_ucznia
+	,concat(u.imie,' ',u.nazwisko) as uczen
+    ,v.data_operacji, v.kwota
+    ,v.typ_operacji, v.id_operacji
+    ,case when v.typ_operacji='WPL' then 'WPŁATA'
+          when v.typ_operacji='NAL' then 
+            concat('ZAJĘCIA ',coalesce(z.data_odrabiania,z.data_zajec),' (',dn.nazwa_dnia,') g.',p.godzina_rozp,' ',g.nazwa)
+		  else  'unknown' end as tytulem
+from v_saldo_uczniow v
+inner join t_uczniowie u on u.id_ucznia=v.id_ucznia
+left join t_rozliczenia_uczniow ru on ru.id_rozliczenia=v.id_operacji
+left join t_zajecia z on z.id_zajecia=ru.id_zajecia
+left join t_plany p on p.id_planu=z.id_planu
+left join t_grupy g on g.id_grupy=p.id_grupy
+left join t_dni_robocze dn on dn.id_dnia=p.id_dnia
+where v.id_ucznia=96;
+
+select * from v_saldo_uczniow where id_ucznia=96;
+
+select * from t_wplaty where id_ucznia=96

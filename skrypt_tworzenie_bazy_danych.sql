@@ -216,9 +216,11 @@ create table t_wyplaty(
 
 -- Widok z rozliczeniem uczniów (należności-wpaty)
 create or replace view v_saldo_uczniow as 
-	select data_zaksiegowania as data_operacji, -kwota as kwota, id_ucznia from t_wplaty
+	select data_zaksiegowania as data_operacji, -kwota as kwota, id_ucznia, id_wplaty as id_operacji, 'WPL' as typ_operacji
+    from t_wplaty
     union
-    select data_zobowiazania, kwota_brutto, id_ucznia from t_rozliczenia_uczniow;
+    select data_zobowiazania, kwota_brutto, id_ucznia,  id_rozliczenia, 'NAL'
+    from t_rozliczenia_uczniow;
 
 
 -- Widok z rozliczeniem nauczycieli (należności-wpaty)
@@ -362,3 +364,21 @@ inner join t_nauczyciele n on n.id_nauczyciela=z.id_nauczyciela
 inner join t_nauczyciele n0 on n0.id_nauczyciela=p.id_nauczyciela
 inner join t_grupy g on g.id_grupy=p.id_grupy
 inner join v_ile_uczniow_w_grupie v on v.id_grupy=p.id_grupy;
+
+-- widok z rozliczenie ucznia
+create or replace view v_rozliczenie_ucznia as
+select v.id_ucznia
+	,concat(u.imie,' ',u.nazwisko) as uczen
+    ,v.data_operacji, v.kwota
+    ,v.typ_operacji, v.id_operacji
+    ,case when v.typ_operacji='WPL' then 'WPŁATA'
+          when v.typ_operacji='NAL' then 
+            concat('ZAJĘCIA ',coalesce(z.data_odrabiania,z.data_zajec),' (',dn.nazwa_dnia,') g.',p.godzina_rozp,' ',g.nazwa)
+		  else  'unknown' end as tytulem
+from v_saldo_uczniow v
+inner join t_uczniowie u on u.id_ucznia=v.id_ucznia
+left join t_rozliczenia_uczniow ru on ru.id_rozliczenia=v.id_operacji
+left join t_zajecia z on z.id_zajecia=ru.id_zajecia
+left join t_plany p on p.id_planu=z.id_planu
+left join t_grupy g on g.id_grupy=p.id_grupy
+left join t_dni_robocze dn on dn.id_dnia=p.id_dnia;

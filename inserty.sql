@@ -444,6 +444,7 @@ insert into app_menu(menuid,pos,caption,parent) values ('DIU',12,'Zablokuj użyt
 insert into app_menu(menuid,pos,caption,parent) values ('EIU',12,'Odblokuj użytkownika','ADU');
 insert into app_menu(menuid,pos,caption,parent) values ('CHRU',13,'Zmień rolę użytkownika','ADU');
 insert into app_menu(menuid,pos,caption,parent) values ('CHPU',14,'Zmień hasło użytkownika','ADU');
+insert into app_menu(menuid,pos,caption,parent) values ('OBECN',100,'Lista obecności','LESSONS');
 
 insert into app_menu(menuid,pos,caption,parent) values ('SEKR',20,'Sekretariat','MAIN');
 insert into app_menu(menuid,pos,caption,parent) values ('STUDENTS',20,'Administracja uczniami','SEKR');
